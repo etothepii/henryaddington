@@ -19,6 +19,11 @@
     <args4j.version>2.0.16</args4j.version>
     <geotools.version>10-beta</geotools.version>
     <xbasej.version>20091203</xbasej.version>
+    <shade.version>2.1</shade.version>
+    <maven.compiler.version>2.3.2</maven.compiler.version>
+    <java.source.version>1.6</java.source.version>
+    <java.target.version>1.6</java.target.version>
+    <shade.version>2.1</shade.version>
   </properties>
 
   <scm>
@@ -72,75 +77,51 @@
       <artifactId>args4j</artifactId>
       <version>${args4j.version}</version>
     </dependency>
+    <dependency>
+      <groupId>org.apache.maven.plugins</groupId>
+      <artifactId>maven-shade-plugin</artifactId>
+      <version>${shade.version}</version>
+    </dependency>
   </dependencies>
   <build>
-    <finalName>${project.groupId}.${project.artifactId}-${project.version}-r${buildNumber}</finalName>
+    <finalName>${project.groupId}.${project.artifactId}-${project.version}</finalName>
     <plugins>
       <plugin>
-        <groupId>org.codehaus.groovy.maven</groupId>
-        <artifactId>gmaven-plugin</artifactId>
-        <version>1.0</version>
-        <executions>
-          <execution>
-            <phase>validate</phase>
-            <goals>
-              <goal>execute</goal>
-            </goals>
-            <configuration>
-              <source>project.properties["hostname"] =
-                InetAddress.getLocalHost().getHostName()</source>
-            </configuration>
-          </execution>
-        </executions>
-      </plugin>
-      <plugin>
-        <groupId>org.codehaus.mojo</groupId>
-        <artifactId>buildnumber-maven-plugin</artifactId>
-        <version>1.0</version>
-        <executions>
-          <execution>
-            <phase>validate</phase>
-            <goals>
-              <goal>create</goal>
-            </goals>
-          </execution>
-        </executions>
-        <configuration>
-          <revisionOnScmFailure>UNK</revisionOnScmFailure>
-          <doCheck>false</doCheck>
-          <doUpdate>false</doUpdate>
-          <format>{0,date,yyyyMMdd.HH.mm.ss}.${hostname}</format>
-          <items>
-            <item>timestamp</item>
-          </items>
-        </configuration>
-      </plugin>
-      <plugin>
         <artifactId>maven-compiler-plugin</artifactId>
-        <version>2.3.2</version>
+        <version>${maven.compiler.version}</version>
         <configuration>
-          <source>1.6</source>
-          <target>1.6</target>
+          <source>${java.source.version}</source>
+          <target>${java.target.version}</target>
         </configuration>
       </plugin>
       <plugin>
-        <artifactId>maven-assembly-plugin</artifactId>
-        <configuration>
-          <finalName>${project.artifactId}</finalName>
-          <descriptors>
-            <descriptor>src/assemble/single-jar.xml</descriptor>
-          </descriptors>
-          <archive>
-            <manifest>
-              <mainClass>${mainClass}</mainClass>
-              <addDefaultImplementationEntries>true</addDefaultImplementationEntries>
-              <addDefaultSpecificationEntries>true</addDefaultSpecificationEntries>
-            </manifest>
-            <manifestEntries>
-              <Implementation-Build>${buildNumber}</Implementation-Build>
-            </manifestEntries>
-          </archive>
-        </configuration>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-shade-plugin</artifactId>
+	<version>${shade.version}</version>
+	<executions>
+	  <execution>
+	    <phase>package</phase>
+	    <goals>
+	      <goal>shade</goal>
+	    </goals>  
+            <configuration>
+	      <transformers>
+	        <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+	          <manifestEntries>
+	            <Main-Class>${mainClass}</Main-Class>
+                    <Specification-Title>Java Advanced Imaging Image I/O Tools</Specification-Title>
+                    <Specification-Version>1.0-mr</Specification-Version>
+                    <Specification-Vendor>Sun Microsystems, Inc.</Specification-Vendor>
+                    <Implementation-Title>com.sun.media.imageio</Implementation-Title>
+                    <Implementation-Version>1.0_01</Implementation-Version>
+                    <Implementation-Vendor>Sun Microsystems, Inc.</Implementation-Vendor>
+                    <Extension-Name>com.sun.media.imageio</Extension-Name>
+	          </manifestEntries>
+	        </transformer>
+	      </transformers>
+            </configuration>
+	  </execution>
+	</executions>
       </plugin>
     </plugins>
   </build>  

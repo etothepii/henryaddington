@@ -31,6 +31,8 @@ obj/
 [Rr]elease*/
 Ankh.NoLoad
 [Ff]akesAssemblies/
+#Shade plugin
+dependency-reduced-pom.xml
 
 #Tooling
 _ReSharper*/
