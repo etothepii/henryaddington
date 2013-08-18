@@ -14,17 +14,23 @@ public class Main {
     private static String imageFormat = "tif";
     private static int columns;
     private static int rows;
+    private static String[][] splitDescription;
 
     public static void main(String[] args) {
-        if (args.length > 3 && args[0].equals("IMAGE_SPLIT")) {
+        if (args.length > 3 && args[0].equals("NUMERIC_IMAGE_SPLIT")) {
             columns = Integer.parseInt(args[1]);
             rows = Integer.parseInt(args[2]);
             imageSplit(Arrays.copyOfRange(args, 3, args.length));
         }
+        if (args.length > 3 && args[0].equals("DESCRIBED_IMAGE_SPLIT")) {
+            splitDescription = ImageSpliter.getSplitDescription(new File(args[1]), args[2], Integer.parseInt(args[3]));
+            imageSplit(Arrays.copyOfRange(args, 4, args.length));
+        }
     }
 
     private static void imageSplit(String[] files) {
-        ImageSpliter imageSpliter = new ImageSpliter(imageFormat, columns, rows);
+        ImageSpliter imageSpliter = splitDescription == null ?
+                new ImageSpliter(imageFormat, columns, rows) : new ImageSpliter(imageFormat, splitDescription);
         FilenameFilter imageFiles = new FilenameFilter() {
             @Override
             public boolean accept(File dir, String name) {
