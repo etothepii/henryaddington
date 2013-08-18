@@ -80,7 +80,7 @@ public class ImageSpliter {
             if (!matcher.matches()) {
                 throw new IllegalArgumentException("All files must have an extension");
             }
-            fileStem = matcher.group(1);
+            fileStem = String.format("%s%s", matcher.group(1), "_");
             workingImage = ImageIO.read(workingFile);
             if (workingImage == null) {
                 LOG.error("Supported File Formats");
