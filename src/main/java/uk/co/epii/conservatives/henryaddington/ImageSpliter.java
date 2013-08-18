@@ -4,13 +4,16 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.imageio.ImageIO;
-import javax.imageio.spi.IIORegistry;
 import java.awt.*;
 import java.awt.image.BufferedImage;
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileReader;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.List;
 
 /**
  * User: James Robinson
@@ -31,8 +34,18 @@ public class ImageSpliter {
     private File workingFile;
     int width;
     int height;
+    private String[][] names;
 
     public ImageSpliter(String imageFormat, int columns, int rows) {
+        this(imageFormat, columns, rows, null);
+    }
+
+    public ImageSpliter(String imageFormat, String[][] names) {
+        this(imageFormat, names[0].length, names.length, names);
+    }
+
+    private ImageSpliter(String imageFormat, int columns, int rows, String[][] names) {
+        this.names = names;
         this.imageFormat = imageFormat;
         this.columns = columns;
         this.rows = rows;
@@ -42,6 +55,7 @@ public class ImageSpliter {
         loadImage(file);
         for (int x = 0; x < columns; x++) {
             for (int y = 0; y < rows; y++) {
+                if (names != null && names[y][x] == null) continue;
                 File outputFile = getOutputFile(x, y);
                 Rectangle rectangle = getRectangle(x, y);
                 LOG.debug("{} ==> {}", new Object[] {rectangle, outputFile});
@@ -69,7 +83,12 @@ public class ImageSpliter {
     }
 
     private File getOutputFile(int x, int y) {
-        return new File(String.format("%s%d%d.%s", new Object[] {fileStem, x, y, imageFormat}));
+        if (this.names == null) {
+            return new File(String.format("%s%d%d.%s", new Object[] {fileStem, x, y, imageFormat}));
+        }
+        else {
+            return new File(String.format("%s%s.%s", new Object[] {fileStem, names[y][x], imageFormat}));
+        }
     }
 
     private void loadImage(File file) {
@@ -106,4 +125,28 @@ public class ImageSpliter {
         }
     }
 
+    public static String[][] getSplitDescription(File file, String nullString, int descriptionLength) {
+        List<String[]> lines = new ArrayList<String[]>();
+        try {
+            FileReader fileReader = new FileReader(file);
+            BufferedReader bufferedReader = new BufferedReader(fileReader);
+            String in;
+            while ((in = bufferedReader.readLine()) != null) {
+                lines.add(parse(in, nullString, descriptionLength));
+            }
+            return lines.toArray(new String[lines.size()][]);
+        }
+        catch (IOException ioe) {
+            throw new RuntimeException(ioe);
+        }
+    }
+
+    private static String[] parse(String line, String nullString, int descriptionLength) {
+        String[] descriptions = new String[line.length() / descriptionLength];
+        for (int i = 0; i < descriptions.length; i++) {
+            String substring = line.substring(i * descriptionLength, (i + 1) * descriptionLength);
+            descriptions[i] = substring.equals(nullString) ? null : substring;
+        }
+        return descriptions;
+    }
 }
