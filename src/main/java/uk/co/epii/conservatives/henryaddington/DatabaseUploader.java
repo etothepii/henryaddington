@@ -30,6 +30,11 @@ public class DatabaseUploader {
     private String protocol;
     private Connection connection;
     private int port;
+    private List<String> files;
+
+    public void setFiles(List<String> files) {
+        this.files = files;
+    }
 
     public void setCreateScriptLocation(String createScriptLocation) {
         this.createScriptLocation = createScriptLocation;
@@ -167,8 +172,8 @@ public class DatabaseUploader {
         }
     }
 
-    public void upload(String[] files) {
-        Map<String, String> tableTempFiles = parseDataToOneTempFilePerTable(files);
+    public void upload() {
+        Map<String, String> tableTempFiles = parseDataToOneTempFilePerTable();
         try {
             for (Map.Entry<String, String> entry : tableTempFiles.entrySet()) {
                 Statement statement = connection.createStatement(ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_UPDATABLE);
@@ -183,7 +188,7 @@ public class DatabaseUploader {
         }
     }
 
-    private Map<String, String> parseDataToOneTempFilePerTable (String[] files) {
+    private Map<String, String> parseDataToOneTempFilePerTable () {
         Map<Integer, FileWriter> fileWriters = new HashMap<Integer, FileWriter>();
         Map<Integer, PrintWriter> printWriters = new HashMap<Integer, PrintWriter>();
         try {
@@ -210,7 +215,7 @@ public class DatabaseUploader {
                         printWriter = new PrintWriter(fileWriter, true);
                         printWriters.put(recordIdentifier, printWriter);
                     }
-                    printWriter.println(in.replaceAll("\"\"", "NULL").replaceAll(",,",",NULL,").replaceAll(",,",",NULL,"));
+                    printWriter.println(in.replaceAll("\"\"", "NULL").replaceAll(",,", ",NULL,").replaceAll(",,",",NULL,"));
                 }
             }
             return tableTempFiles;

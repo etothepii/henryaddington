@@ -1,0 +1,45 @@
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+	http://www.springframework.org/schema/beans/spring-beans-2.5.xsd">
+
+    <bean id="databaseUploader" class="uk.co.epii.conservatives.henryaddington.DatabaseUploader" init-method="init">
+        <property name="createScriptLocation" value="/createAddressBaseTables.sql" />
+        <property name="database" value="frederickNorth" />
+        <property name="username" value="jrrpl" />
+        <property name="passwordLocation" value="/Users/jrrpl/.passwords/frederickNorth.txt" />
+        <property name="driver" value="com.mysql.jdbc.Driver"/>
+        <property name="server" value="localhost"/>
+        <property name="port" value="3306"/>
+        <property name="recordIdentiferTableMap">
+            <map>
+                <entry key="28" value="DeliveryPointAddress"/>
+                <entry key="21" value="BLPU"/>
+            </map>
+        </property>
+        <property name="files">
+            <list>
+                <value>/Volumes/USB2/AddressBasePremiumCSV/data/AddressBasePremium_FULL_2013-08-06_001.csv</value>
+                <value>/Volumes/USB2/AddressBasePremiumCSV/data/AddressBasePremium_FULL_2013-08-06_002.csv</value>
+                <value>/Volumes/USB2/AddressBasePremiumCSV/data/AddressBasePremium_FULL_2013-08-06_003.csv</value>
+            </list>
+        </property>
+    </bean>
+
+    <bean id="hibernatePrinter" class="uk.co.epii.conservatives.henryaddington.hibernate.HibernatePrinter">
+        <property name="javaDirectory" value="~/git/conservatives/frederickNorth/src/main/java/uk/co/epii/conservatives/fredericknorth/db"/>
+        <property name="hibernateDirectory" value="~/git/conservatives/frederickNorth/src/main/resources/hibernate"/>
+        <property name="javaPackage" value="uk.co.epii.conservatives.fredericknorth.db" />
+        <property name="javaImports">
+            <list>
+                <value>java.sql.Date</value>
+            </list>
+        </property>
+    </bean>
+
+    <bean id="hibernateBuilder" class="uk.co.epii.conservatives.henryaddington.hibernate.HibernateBuilder">
+        <property name="resource" value="/createAddressBaseTables.sql" />
+        <property name="hibernatePrinter" ref="hibernatePrinter"/>
+    </bean>
+
+</beans>
