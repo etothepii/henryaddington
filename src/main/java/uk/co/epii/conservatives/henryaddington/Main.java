@@ -48,6 +48,10 @@ public class Main {
             HibernateBuilder hibernateBuilder = (HibernateBuilder)context.getBean("hibernateBuilder");
             hibernateBuilder.process();
         }
+        else if (args.length > 2 && args[0].equals("VOA")) {
+            VOAMerger voaMerger = new VOAMerger(new File(args[1]), new File(args[2]));
+            voaMerger.merge();
+        }
     }
 
     private static void imageSplit(String[] files) {
