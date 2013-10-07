@@ -11,7 +11,6 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Properties;
 import java.util.TreeMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -34,6 +33,13 @@ public class VOADownloader {
     private HtmlSelect councilTaxBandSelect;
     private TreeMap<String, String> localAuthorityCodes;
     private ArrayList<String> bands;
+    private HtmlPage resultsHtmlPage;
+    private int seen;
+    private int total;
+    private String council;
+    private String band;
+    private FileWriter fileWriter;
+    private PrintWriter printWriter;
 
     private String advancedSearchFormId;
     private String localAuthoritySelectId;
@@ -42,11 +48,7 @@ public class VOADownloader {
     private String saveLocationRoot;
     private String voaUri;
     private int paginate;
-    private HtmlPage resultsHtmlPage;
-    private int seen;
-    private int total;
-    private String council;
-    private String band;
+    private long sleepBetweenPageRequests;
 
     public VOADownloader()
     {
@@ -119,79 +121,154 @@ public class VOADownloader {
                 break;
             }
         if (dwellingSearchForm == null) {
-            throw new RuntimeException(new StringBuilder().append("Form with id \"").append(advancedSearchFormId).append("\" can not be found").toString());
+            throw new RuntimeException(String.format("Form with id '{}' cannot be found", advancedSearchFormId));
         }
     }
 
     private void findSearchButton() {
-        for (HtmlElement e : dwellingSearchForm.getElementsByTagName("button"))
-            if ((e.getAttribute("value").equals("Search")) && (e.getAttribute("type").equals("submit")))
+        for (HtmlElement e : dwellingSearchForm.getElementsByTagName("button")) {
+            if ((e.getAttribute("value").equals("Search")) && (e.getAttribute("type").equals("submit"))) {
                 searchButton = ((HtmlButton)e);
+            }
+        }
+    }
+
+    public void downloadAll() {
+        for (String council : localAuthorityCodes.keySet()) {
+            download(council);
+        }
+    }
+
+    public void download(String council) {
+        initiateWriters(council, null);
+        try {
+            for (String band : bands) {
+                process(council, band);
+            }
+        }
+        finally {
+            closeWriters();
+        }
     }
 
     public void download(String council, String band) {
+        initiateWriters(council, band);
+        try {
+            process(council, band);
+        }
+        finally {
+            closeWriters();
+        }
+    }
+
+    private void process(String council, String band) {
         this.council = council;
         this.band = band;
         selectTargetCouncilAndBand(council, band);
         loadPageOfDesiredSize();
         findTotal();
+        readAndWrite();
+    }
+
+    private void readAndWrite() {
         seen = 0;
         while (seen < total) {
+            LOG.info("{} - {} loaded: {} of {}", new Object[]{council, band, seen, total});
+            save(getResultsTable());
+            if (isComplete()) {
+                break;
+            }
             loadNextPage();
+            pauseToAvoidDoSAttack();
         }
     }
 
-    private boolean loadNextPage() {
-        LOG.info("{} - {} loaded: {} of {}", new Object[]{council, band, seen, total});
-        ArrayList searchResults = getResultsTables();
-        else if (searchResults.size() == 1) {
-            int counted = save((HtmlTable)searchResults.get(0), council, band, new StringBuilder().append(seen + 1).append("_").append(Math.min(seen + paginate, total)).toString(), seen == 0);
-            seen += counted;
-            if (counted != paginate && seen != total) {
-                LOG.error("Not enough resultsHtmlPage, only: " + counted);
-                LOG.debug(resultsHtmlPage.asXml());
-                return true;
-            }
+    private boolean isComplete() {
+        if (seen == total) {
+            return true;
         }
+        if (seen > total) {
+            throw new IllegalStateException("More than the expected total number of results has been seen");
+        }
+        return false;
+    }
 
-        HtmlAnchor nextPage = null;
-        for (DomElement e : resultsHtmlPage.getElementsByTagName("a")) {
-            if ((e.getTextContent().trim().equals("Next page")) && (e.getAttribute("href").equals("Javascript:Next()")))
-            {
-                nextPage = (HtmlAnchor)e;
-                break;
-            }
-        }
-        if (nextPage == null) return true;
+    private void loadNextPage() {
+        HtmlAnchor nextPage = findNextPage();
         try {
             resultsHtmlPage = nextPage.click();
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+    }
 
+    private void initiateWriters(String council, String band) {
+        String fileName = band == null ?
+                String.format("%s%s.txt", saveLocationRoot, council) :
+                String.format("%s%s-%s.txt", saveLocationRoot, council, band);
         try {
-            Thread.sleep(1000L);
+            fileWriter = new FileWriter(fileName.toString(), true);
+            printWriter = new PrintWriter(fileWriter, true);
+        }
+        catch (IOException ioe) {
+            throw new RuntimeException(ioe);
+        }
+    }
+
+    private void closeWriters() {
+        if (printWriter != null) {
+            printWriter.flush();
+            printWriter.close();
+            printWriter = null;
+        }
+        if (fileWriter != null) {
+            try {
+                fileWriter.close();
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+            finally {
+                fileWriter = null;
+            }
+        }
+    }
+
+    private void pauseToAvoidDoSAttack() {
+        try {
+            Thread.sleep(sleepBetweenPageRequests);
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }
-        return false;
     }
 
-    private ArrayList<HtmlTable> getResultsTables() {
+    private HtmlAnchor findNextPage() {
+        for (DomElement e : resultsHtmlPage.getElementsByTagName("a")) {
+            if ((e.getTextContent().trim().equals("Next page")) && (e.getAttribute("href").equals("Javascript:Next()")))
+            {
+                return (HtmlAnchor)e;
+            }
+        }
+        LOG.debug(resultsHtmlPage.asXml());
+        throw new IllegalStateException("The current page is not the end yet in contains no next page anchor");
+    }
+
+    private HtmlTable getResultsTable() {
         ArrayList<HtmlTable> resultsTables = new ArrayList<HtmlTable>();
         for (DomElement e : resultsHtmlPage.getElementsByTagName("table")) {
             if (e.getAttribute("title").equals("Search resultsHtmlPage"))
                 resultsTables.add((HtmlTable)e);
         }
-        if (searchResults.isEmpty()) {
+        if (resultsTables.isEmpty()) {
             LOG.error("No search resultsHtmlPage found");
             LOG.debug(resultsHtmlPage.asXml());
+            throw new IllegalStateException("No search resultsHtmlPage found");
         }
-        else if (searchResults.size() > 1) {
+        if (resultsTables.size() > 1) {
             LOG.error("Multiple resultsHtmlPage found");
-            return true;
+            LOG.debug(resultsHtmlPage.asXml());
+            throw new IllegalStateException("Multiple resultsHtmlPage found");
         }
-
+        return resultsTables.get(0);
     }
 
     private void loadPageOfDesiredSize() {
@@ -220,64 +297,28 @@ public class VOADownloader {
         councilTaxBandSelect.setSelectedAttribute(band, true);
     }
 
-    public int save(HtmlTable t, String council, String band, String page, boolean firstPage) {
-        int seen = 0;
-        LOG.debug(new StringBuilder().append("Table: ").append(council).append("-").append(band).append("-").append(page).toString());
-        try {
-            StringBuilder fileName = new StringBuilder(saveLocationRoot);
-            fileName.append(council);
-            fileName.append("-");
-            fileName.append(band);
-            fileName.append(".txt");
-            FileWriter fw = null;
-            PrintWriter pw = null;
-            try {
-                fw = new FileWriter(fileName.toString(), !firstPage);
-                pw = new PrintWriter(fw, true);
-                for (HtmlTableBody b : t.getBodies()) {
-                    List rows = b.getRows();
-                    for (HtmlTableRow r : b.getRows()) {
-                        StringBuilder sb = new StringBuilder();
-                        boolean first = true;
-                        List cells = r.getCells();
-                        if (cells.size() == 4) {
-                            for (int cell = 0; cell < 4; cell++) {
-                                HtmlTableCell c = (HtmlTableCell)cells.get(cell);
-                                if (first)
-                                    first = false;
-                                else
-                                    sb.append("~");
-                                String text = c.getTextContent().trim();
-                                if (cell == 2) {
-                                    if (text.length() == 0)
-                                        sb.append("YES");
-                                    else
-                                        sb.append("NO");
-                                }
-                                else
-                                    sb.append(text);
-                            }
-                            pw.println(sb);
-                            seen++;
-                        }
-                    }
+    public void save(HtmlTable table) {
+        LOG.debug("Table: {}-{}-{}", new Object[] {council, band, seen});
+        int saved = 0;
+        for (HtmlTableBody tableBody : table.getBodies()) {
+            for (HtmlTableRow row : tableBody.getRows()) {
+                List<HtmlTableCell> cells = row.getCells();
+                if (cells.size() != 4) {
+                    continue;
                 }
-            } finally {
-                if (pw != null) {
-                    pw.flush();
-                    pw.close();
-                }
-                if (fw != null)
-                    fw.close();
+                printWriter.println(String.format("%s~%s~%s~%s",
+                        cells.get(0).getTextContent().trim(),
+                        cells.get(1).getTextContent().trim(),
+                        cells.get(2).getTextContent().trim().length() == 0 ? "YES" : "NO",
+                        cells.get(3).getTextContent().trim()));
+                saved++;
             }
         }
-        catch (IOException ioe)
-        {
-            FileWriter fw;
-            PrintWriter pw;
-            LOG.error(ioe.getMessage(), ioe);
+        seen += saved;
+        if (saved != paginate && seen != total) {
+            throw new IllegalArgumentException(
+                    String.format("The table provided contains the wrong number of cells: {}", saved));
         }
-        return seen;
     }
 
     public void setVoaUri(String voaUri) {
@@ -306,5 +347,9 @@ public class VOADownloader {
 
     public void setPaginationSelectId(String paginationSelectId) {
         this.paginationSelectId = paginationSelectId;
+    }
+
+    public void setSleepBetweenPageRequests(long sleepBetweenPageRequests) {
+        this.sleepBetweenPageRequests = sleepBetweenPageRequests;
     }
 }

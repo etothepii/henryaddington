@@ -5,6 +5,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 import uk.co.epii.conservatives.henryaddington.hibernate.HibernateBuilder;
+import uk.co.epii.conservatives.henryaddington.voa.VOADownloader;
 import uk.co.epii.conservatives.henryaddington.voa.VOAMerger;
 
 import java.io.File;
@@ -56,6 +57,26 @@ public class Main {
             }
             catch (IOException ioe) {
                 throw new RuntimeException(ioe);
+            }
+        }
+        else if (args.length > 1 && args[0].equals("VOA")) {
+            VOADownloader downloader = (VOADownloader)context.getBean("voaDownloader");
+            downloader.init();
+            if (args[1].equals("ALL")) {
+                downloader.downloadAll();
+            }
+            else {
+                for (int i = 1; i < args.length; i++) {
+                    if (i + 1 < args.length && args[i + 1].length() == 1) {
+                        String council = args[i];
+                        for (; i + 1 < args.length && args[i + 1].length() == 1; i++) {
+                            downloader.download(council, args[i + 1]);
+                        }
+                    }
+                    else {
+                        downloader.download(args[i]);
+                    }
+                }
             }
         }
     }
