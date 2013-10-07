@@ -22,68 +22,91 @@ public class Main {
 
     private static final Logger LOG = LoggerFactory.getLogger(Main.class);
 
+    private static ApplicationContext context;
+
     private static String imageFormat = "tif";
     private static int columns;
     private static int rows;
     private static String[][] splitDescription;
 
     public static void main(String[] args) {
-        ApplicationContext context = new ClassPathXmlApplicationContext("applicationContext.xml");
-        if (args.length > 3 && args[0].equals("NUMERIC_IMAGE_SPLIT")) {
-            columns = Integer.parseInt(args[1]);
-            rows = Integer.parseInt(args[2]);
-            imageSplit(Arrays.copyOfRange(args, 3, args.length));
+        context = new ClassPathXmlApplicationContext("applicationContext.xml");
+        if (args[0].equals("NUMERIC_IMAGE_SPLIT")) {
+            numericImageSplit(args);
         }
-        else if (args.length > 3 && args[0].equals("DESCRIBED_IMAGE_SPLIT")) {
-            splitDescription = ImageSpliter.getSplitDescription(new File(args[1]), args[2], Integer.parseInt(args[3]));
-            imageSplit(Arrays.copyOfRange(args, 4, args.length));
+        else if (args[0].equals("DESCRIBED_IMAGE_SPLIT")) {
+            describedImageSplit(args);
         }
-        else if (args.length > 0 && args[0].equals("DATABASE")) {
-            DatabaseUploader databaseUploader = (DatabaseUploader)context.getBean("databaseUploader");
-            if (databaseUploader.cleanDatabase()) {
-                LOG.info("Successfully Cleaned Database");
-                databaseUploader.upload();
-            }
-            else {
-                LOG.info("Failed to Cleaned Database");
-            }
-            HibernateBuilder hibernateBuilder = (HibernateBuilder)context.getBean("hibernateBuilder");
-            hibernateBuilder.process();
+        else if (args[0].equals("DATABASE")) {
+            database();
         }
-        else if (args.length > 2 && args[0].equals("VOAMERGE")) {
-            VOAMerger voaMerger = new VOAMerger(new File(args[1]), new File(args[2]));
-            try {
-                voaMerger.merge();
-            }
-            catch (IOException ioe) {
-                throw new RuntimeException(ioe);
-            }
+        else if (args[0].equals("VOA_MERGE")) {
+            voaMerge(args);
         }
-        else if (args.length > 1 && args[0].equals("VOA")) {
-            VOADownloader downloader = (VOADownloader)context.getBean("voaDownloader");
-            downloader.init();
-            if (args[1].equals("ALL")) {
-                downloader.downloadAll();
-            }
-            else {
-                for (int i = 1; i < args.length; i++) {
-                    if (i + 1 < args.length && args[i + 1].length() == 1) {
-                        String council = args[i];
-                        for (; i + 1 < args.length && args[i + 1].length() == 1; i++) {
-                            downloader.download(council, args[i + 1]);
-                        }
-                    }
-                    else {
-                        downloader.download(args[i]);
-                    }
-                }
+        else if (args[0].equals("VOA")) {
+            voa(args);
+        }
+        else if (args[0].equals("VOA_SINGLE_BAND")) {
+            voaSingleBand(args);
+        }
+    }
+
+    private static void voaSingleBand(String[] args) {
+        VOADownloader downloader = (VOADownloader)context.getBean("voaDownloader");
+        downloader.init();
+        downloader.download(args[1], args[2]);
+    }
+
+    private static void voa(String[] args) {
+        VOADownloader downloader = (VOADownloader)context.getBean("voaDownloader");
+        downloader.init();
+        if (args[1].equals("ALL")) {
+            downloader.downloadAll();
+        }
+        else {
+            for (int i = 1; i < args.length; i++) {
+                    downloader.download(args[i]);
             }
         }
     }
 
+    private static void voaMerge(String[] args) {
+        VOAMerger voaMerger = new VOAMerger(new File(args[1]), new File(args[2]));
+        try {
+            voaMerger.merge();
+        }
+        catch (IOException ioe) {
+            throw new RuntimeException(ioe);
+        }
+    }
+
+    private static void database() {
+        DatabaseUploader databaseUploader = (DatabaseUploader)context.getBean("databaseUploader");
+        if (databaseUploader.cleanDatabase()) {
+            LOG.info("Successfully Cleaned Database");
+            databaseUploader.upload();
+        }
+        else {
+            LOG.info("Failed to Cleaned Database");
+        }
+        HibernateBuilder hibernateBuilder = (HibernateBuilder)context.getBean("hibernateBuilder");
+        hibernateBuilder.process();
+    }
+
+    private static void describedImageSplit(String[] args) {
+        splitDescription = ImageSplitter.getSplitDescription(new File(args[1]), args[2], Integer.parseInt(args[3]));
+        imageSplit(Arrays.copyOfRange(args, 4, args.length));
+    }
+
+    private static void numericImageSplit(String[] args) {
+        columns = Integer.parseInt(args[1]);
+        rows = Integer.parseInt(args[2]);
+        imageSplit(Arrays.copyOfRange(args, 3, args.length));
+    }
+
     private static void imageSplit(String[] files) {
-        ImageSpliter imageSpliter = splitDescription == null ?
-                new ImageSpliter(imageFormat, columns, rows) : new ImageSpliter(imageFormat, splitDescription);
+        ImageSplitter imageSplitter = splitDescription == null ?
+                new ImageSplitter(imageFormat, columns, rows) : new ImageSplitter(imageFormat, splitDescription);
         FilenameFilter imageFiles = new FilenameFilter() {
             @Override
             public boolean accept(File dir, String name) {
@@ -94,14 +117,12 @@ public class Main {
             File file = new File(fileString);
             if (file.isDirectory()) {
                 for (File child : file.listFiles(imageFiles)) {
-                    imageSpliter.splitImage(child);
+                    imageSplitter.splitImage(child);
                 }
             }
             else {
-                imageSpliter.splitImage(file);
+                imageSplitter.splitImage(file);
             }
         }
     }
-
-
 }
