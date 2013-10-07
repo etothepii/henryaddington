@@ -316,7 +316,7 @@ public class VOADownloader {
         seen += saved;
         if (saved != paginate && seen != total) {
             throw new IllegalArgumentException(
-                    String.format("The table provided contains the wrong number of cells: {}", saved));
+                    String.format("The table provided contains the wrong number of cells: %s", saved));
         }
     }
 
