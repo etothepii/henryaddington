@@ -243,7 +243,7 @@ public class VOADownloader {
                 return (HtmlAnchor)e;
             }
         }
-        LOG.debug(resultsHtmlPage.asXml());
+        LOG.error(resultsHtmlPage.asXml());
         throw new IllegalStateException("The current page is not the end yet in contains no next page anchor");
     }
 
@@ -255,12 +255,12 @@ public class VOADownloader {
         }
         if (resultsTables.isEmpty()) {
             LOG.error("No search resultsHtmlPage found");
-            LOG.debug(resultsHtmlPage.asXml());
+            LOG.error(resultsHtmlPage.asXml());
             throw new IllegalStateException("No search resultsHtmlPage found");
         }
         if (resultsTables.size() > 1) {
             LOG.error("Multiple resultsHtmlPage found");
-            LOG.debug(resultsHtmlPage.asXml());
+            LOG.error(resultsHtmlPage.asXml());
             throw new IllegalStateException("Multiple resultsHtmlPage found");
         }
         return resultsTables.get(0);
@@ -277,7 +277,9 @@ public class VOADownloader {
         if (showingMatcher.find()) {
             total = Integer.parseInt(showingMatcher.group(1));
         }
-        throw new IllegalArgumentException("Provided page does not contain a match for the Showing regex");
+        else {
+            throw new IllegalArgumentException("Provided page does not contain a match for the Showing regex");
+        }
     }
 
     private void selectTargetCouncilAndBand(String council, String band) {
@@ -293,7 +295,7 @@ public class VOADownloader {
     }
 
     public void save(HtmlTable table) {
-        LOG.debug("Table: {}-{}-{}", new Object[] {council, band, seen});
+        LOG.info("Table: {}-{}-{}", new Object[] {council, band, seen});
         int saved = 0;
         for (HtmlTableBody tableBody : table.getBodies()) {
             for (HtmlTableRow row : tableBody.getRows()) {
