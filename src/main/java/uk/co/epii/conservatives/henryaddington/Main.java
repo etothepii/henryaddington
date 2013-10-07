@@ -5,10 +5,11 @@ import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 import uk.co.epii.conservatives.henryaddington.hibernate.HibernateBuilder;
-import uk.co.epii.conservatives.henryaddington.hibernate.HibernatePrinter;
+import uk.co.epii.conservatives.henryaddington.voa.VOAMerger;
 
 import java.io.File;
 import java.io.FilenameFilter;
+import java.io.IOException;
 import java.util.Arrays;
 
 /**
@@ -26,6 +27,7 @@ public class Main {
     private static String[][] splitDescription;
 
     public static void main(String[] args) {
+        ApplicationContext context = new ClassPathXmlApplicationContext("applicationContext.xml");
         if (args.length > 3 && args[0].equals("NUMERIC_IMAGE_SPLIT")) {
             columns = Integer.parseInt(args[1]);
             rows = Integer.parseInt(args[2]);
@@ -36,7 +38,6 @@ public class Main {
             imageSplit(Arrays.copyOfRange(args, 4, args.length));
         }
         else if (args.length > 0 && args[0].equals("DATABASE")) {
-            ApplicationContext context = new ClassPathXmlApplicationContext("applicationContext.xml");
             DatabaseUploader databaseUploader = (DatabaseUploader)context.getBean("databaseUploader");
             if (databaseUploader.cleanDatabase()) {
                 LOG.info("Successfully Cleaned Database");
@@ -48,9 +49,14 @@ public class Main {
             HibernateBuilder hibernateBuilder = (HibernateBuilder)context.getBean("hibernateBuilder");
             hibernateBuilder.process();
         }
-        else if (args.length > 2 && args[0].equals("VOA")) {
+        else if (args.length > 2 && args[0].equals("VOAMERGE")) {
             VOAMerger voaMerger = new VOAMerger(new File(args[1]), new File(args[2]));
-            voaMerger.merge();
+            try {
+                voaMerger.merge();
+            }
+            catch (IOException ioe) {
+                throw new RuntimeException(ioe);
+            }
         }
     }
 

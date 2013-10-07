@@ -1,4 +1,4 @@
-package uk.co.epii.conservatives.henryaddington;
+package uk.co.epii.conservatives.henryaddington.voa;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
