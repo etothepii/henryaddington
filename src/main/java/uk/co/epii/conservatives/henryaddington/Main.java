@@ -82,6 +82,7 @@ public class Main {
 
     private static void database() {
         DatabaseUploader databaseUploader = (DatabaseUploader)context.getBean("databaseUploader");
+        databaseUploader.init();
         if (databaseUploader.cleanDatabase()) {
             LOG.info("Successfully Cleaned Database");
             databaseUploader.upload();

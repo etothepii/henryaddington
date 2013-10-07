@@ -3,7 +3,7 @@
        xsi:schemaLocation="http://www.springframework.org/schema/beans
 	http://www.springframework.org/schema/beans/spring-beans-2.5.xsd">
 
-    <bean id="databaseUploader" class="uk.co.epii.conservatives.henryaddington.DatabaseUploader" init-method="init">
+    <bean id="databaseUploader" class="uk.co.epii.conservatives.henryaddington.DatabaseUploader">
         <property name="createScriptLocation" value="/createAddressBaseTables.sql" />
         <property name="database" value="frederickNorth" />
         <property name="username" value="jrrpl" />
