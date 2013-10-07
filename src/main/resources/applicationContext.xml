@@ -42,4 +42,12 @@
         <property name="hibernatePrinter" ref="hibernatePrinter"/>
     </bean>
 
+    <bean id="voaDownloader" class="uk.co.epii.conservatives.henryaddington.voa.VOADownloader">
+        <property name="voaUri" value="http://www.voa.gov.uk/cti/RefS.asp?lcn=0"/>
+        <property name="advancedSearchFormId" value="frmRefSForm"/>
+        <property name="localAuthoritySelectId" value="lstBA"/>
+        <property name="councilTaxBandsSelectId" value="lstBand"/>
+        <property name="saveLocationRoot" value="~/frederickNorth/voa/"/>
+        <property name="paginationSelectId" value="lstPageSize"/>
+    </bean>
 </beans>

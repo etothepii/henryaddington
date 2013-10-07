@@ -11,6 +11,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Properties;
 import java.util.TreeMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -24,19 +25,28 @@ public class VOADownloader {
 
     private static final Logger LOG = LoggerFactory.getLogger(VOADownloader.class);
 
+    private final Pattern showingPattern = Pattern.compile("Showing [0-9]* - [0-9]* of ([0-9]*)");
+
     private WebClient webClient;
-    private HtmlForm htmlForm;
+    private HtmlForm dwellingSearchForm;
     private HtmlSelect authoritiesSelect;
     private HtmlButton searchButton;
     private HtmlSelect councilTaxBandSelect;
     private TreeMap<String, String> localAuthorityCodes;
     private ArrayList<String> bands;
 
-    private String advancedSearchFormId = null;
-    private String localAuthoritySelectId = null;
-    private String councilTaxBandsSelectId = null;
-    private String saveLocationRoot = null;
-    private String voaUri = null;
+    private String advancedSearchFormId;
+    private String localAuthoritySelectId;
+    private String councilTaxBandsSelectId;
+    private String paginationSelectId;
+    private String saveLocationRoot;
+    private String voaUri;
+    private int paginate;
+    private HtmlPage resultsHtmlPage;
+    private int seen;
+    private int total;
+    private String council;
+    private String band;
 
     public VOADownloader()
     {
@@ -54,150 +64,160 @@ public class VOADownloader {
 
     public HtmlPage setSelectedAttribute(HtmlSelect s, String attribute)
     {
-        int fails = 0;
-        while (true)
-            try {
-                return (HtmlPage)s.setSelectedAttribute(attribute, true);
-            }
-            catch (Throwable ioe) {
-                if (fails < 10)
-                    fails++;
-                long t = 1000L * (long)Math.pow(2.0D, fails);
-                try {
-                    Thread.sleep(t);
-                }
-                catch (InterruptedException ie) {
-                    LOG.error(ie.getMessage(), ie);
-                }
-            }
+        return s.setSelectedAttribute(attribute, true);
+    }
+
+    public HtmlPage click(HtmlButton button)
+    {
+        try {
+            return button.click();
+        }
+        catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public void init()
     {
-        LOG.info("Initializing VOAProcessor");
-        this.webClient = new WebClient(BrowserVersion.FIREFOX_3_6);
+        initiateWebClient();
+        findDwellingSearchForm();
+        loadAuthorityCodes();
+        loadCouncilTaxBands();
+        findSearchButton();
+    }
+
+    private void initiateWebClient() {
+        this.webClient = new WebClient(BrowserVersion.FIREFOX_17);
         this.webClient.setThrowExceptionOnScriptError(false);
         this.webClient.setThrowExceptionOnFailingStatusCode(false);
-        LOG.info("Downloading page ...");
-        HtmlPage page = getPage(voaUri);
-        List<HtmlForm> forms = page.getForms();
-        htmlForm = null;
-        for (HtmlForm f : forms)
-            if (forms.get(0).getId().equals(advancedSearchFormId)) {
-                htmlForm = f;
-                break;
-            }
-        if (htmlForm == null) {
-            throw new RuntimeException(new StringBuilder().append("Form with id \"").append(advancedSearchFormId).append("\" can not be found").toString());
-        }
+    }
 
-        LOG.info("Found form");
-        authoritiesSelect = htmlForm.getElementById(localAuthoritySelectId);
+    private void loadCouncilTaxBands() {
+        councilTaxBandSelect = dwellingSearchForm.getElementById(councilTaxBandsSelectId);
+        this.bands = new ArrayList();
+        for (HtmlOption o : councilTaxBandSelect.getOptions())
+            this.bands.add(o.getText());
+        this.bands.remove(0);
+    }
+
+    private void loadAuthorityCodes() {
+        authoritiesSelect = dwellingSearchForm.getElementById(localAuthoritySelectId);
         localAuthorityCodes = new TreeMap();
         for (HtmlOption o : this.authoritiesSelect.getOptions()) {
             this.localAuthorityCodes.put(o.getText().toUpperCase(), o.getAttribute("value"));
         }
         this.localAuthorityCodes.remove("");
-        LOG.info("Got all council codes");
-        councilTaxBandSelect = htmlForm.getElementById(councilTaxBandsSelectId);
-        this.bands = new ArrayList();
-        for (HtmlOption o : councilTaxBandSelect.getOptions())
-            this.bands.add(o.getText());
-        this.bands.remove(0);
-        LOG.info("Got all council bands");
-        for (HtmlElement e : htmlForm.getElementsByTagName("button"))
+    }
+
+    private void findDwellingSearchForm() {
+        HtmlPage page = getPage(voaUri);
+        List<HtmlForm> forms = page.getForms();
+        dwellingSearchForm = null;
+        for (HtmlForm f : forms)
+            if (forms.get(0).getId().equals(advancedSearchFormId)) {
+                dwellingSearchForm = f;
+                break;
+            }
+        if (dwellingSearchForm == null) {
+            throw new RuntimeException(new StringBuilder().append("Form with id \"").append(advancedSearchFormId).append("\" can not be found").toString());
+        }
+    }
+
+    private void findSearchButton() {
+        for (HtmlElement e : dwellingSearchForm.getElementsByTagName("button"))
             if ((e.getAttribute("value").equals("Search")) && (e.getAttribute("type").equals("submit")))
                 searchButton = ((HtmlButton)e);
     }
 
     public void download(String council, String band) {
-        while (true) {
-            String value = this.localAuthorityCodes.get(council.toUpperCase());
-            if (!bands.contains(band)) throw new IllegalArgumentException(new StringBuilder().append("Unknown band: ").append(band).toString());
-            if (value == null) throw new IllegalArgumentException(new StringBuilder().append("Unknown council: ").append(council).toString());
-            authoritiesSelect.setSelectedAttribute(value, true);
-            councilTaxBandSelect.setSelectedAttribute(band, true);
-            LOG.info("Loading first page");
-            HtmlPage results = null;
-            try {
-                results = this.searchButton.click();
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
-            String pattern = "Showing [0-9]* - [0-9]* of ([0-9]*)";
-            Pattern p = Pattern.compile(pattern);
-            LOG.info("Converting page to String");
-            String S = results.asText();
-            Matcher m = p.matcher(S);
-            int seen = 0;
-            int paginate = 50;
-            int total = 2147483647;
-            if (m.find()) {
-                total = Integer.parseInt(m.group(1));
-            }
-            HtmlSelect s = (HtmlSelect)results.getElementById("lstPageSize");
-            s.getOptionByValue("50").setValueAttribute(new StringBuilder().append(paginate).append("").toString());
-            results = setSelectedAttribute(s, new StringBuilder().append(paginate).append("").toString());
-            while (seen < total) {
-                LOG.info(new StringBuilder().append("seen: ").append(seen).append(" of ").append(total).toString());
-                ArrayList searchResults = new ArrayList();
-                for (DomElement e : results.getElementsByTagName("table")) {
-                    if (e.getAttribute("title").equals("Search results"))
-                        searchResults.add(e);
-                }
-                if (searchResults.isEmpty()) {
-                    LOG.error("No search results found");
-                    LOG.debug(results.asXml());
-                    break;
-                }
-                else if (searchResults.size() > 1) {
-                    LOG.error("Multiple results found");
-                    break;
-                }
-                else if (searchResults.size() == 1) {
-                    int counted = save((HtmlTable)searchResults.get(0), council, band, new StringBuilder().append(seen + 1).append("_").append(Math.min(seen + paginate, total)).toString(), seen == 0);
-                    seen += counted;
-                    if (counted != paginate && seen != total) {
-                        LOG.error("Not enough results, only: " + counted);
-                        LOG.debug(results.asXml());
-                        break;
-                    }
-                }
+        this.council = council;
+        this.band = band;
+        selectTargetCouncilAndBand(council, band);
+        loadPageOfDesiredSize();
+        findTotal();
+        seen = 0;
+        while (seen < total) {
+            loadNextPage();
+        }
+    }
 
-                HtmlAnchor nextPage = null;
-                for (DomElement e : results.getElementsByTagName("a")) {
-                    if ((e.getTextContent().trim().equals("Next page")) && (e.getAttribute("href").equals("Javascript:Next()")))
-                    {
-                        nextPage = (HtmlAnchor)e;
-                        break;
-                    }
-                }
-                if (nextPage == null) break;
-                try {
-                    results = nextPage.click();
-                } catch (IOException e) {
-                    throw new RuntimeException(e);
-                }
-
-                try {
-                    Thread.sleep(1000L);
-                } catch (InterruptedException e) {
-                    throw new RuntimeException(e);
-                }
-            }
-            if (seen >= total) {
-                LOG.info(String.format("COMPLETED: %s %s", council, band));
-                return;
-            }
-            else {
-                LOG.info(String.format("FAILED: %s %s Sleeping for 5 seconds", council, band));
-                try {
-                    Thread.sleep(5000L);
-                } catch (InterruptedException e) {
-                    throw new RuntimeException(e);
-                }
+    private boolean loadNextPage() {
+        LOG.info("{} - {} loaded: {} of {}", new Object[]{council, band, seen, total});
+        ArrayList searchResults = getResultsTables();
+        else if (searchResults.size() == 1) {
+            int counted = save((HtmlTable)searchResults.get(0), council, band, new StringBuilder().append(seen + 1).append("_").append(Math.min(seen + paginate, total)).toString(), seen == 0);
+            seen += counted;
+            if (counted != paginate && seen != total) {
+                LOG.error("Not enough resultsHtmlPage, only: " + counted);
+                LOG.debug(resultsHtmlPage.asXml());
+                return true;
             }
         }
+
+        HtmlAnchor nextPage = null;
+        for (DomElement e : resultsHtmlPage.getElementsByTagName("a")) {
+            if ((e.getTextContent().trim().equals("Next page")) && (e.getAttribute("href").equals("Javascript:Next()")))
+            {
+                nextPage = (HtmlAnchor)e;
+                break;
+            }
+        }
+        if (nextPage == null) return true;
+        try {
+            resultsHtmlPage = nextPage.click();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
+        try {
+            Thread.sleep(1000L);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+        return false;
+    }
+
+    private ArrayList<HtmlTable> getResultsTables() {
+        ArrayList<HtmlTable> resultsTables = new ArrayList<HtmlTable>();
+        for (DomElement e : resultsHtmlPage.getElementsByTagName("table")) {
+            if (e.getAttribute("title").equals("Search resultsHtmlPage"))
+                resultsTables.add((HtmlTable)e);
+        }
+        if (searchResults.isEmpty()) {
+            LOG.error("No search resultsHtmlPage found");
+            LOG.debug(resultsHtmlPage.asXml());
+        }
+        else if (searchResults.size() > 1) {
+            LOG.error("Multiple resultsHtmlPage found");
+            return true;
+        }
+
+    }
+
+    private void loadPageOfDesiredSize() {
+        resultsHtmlPage = click(searchButton);
+        HtmlSelect s = (HtmlSelect)resultsHtmlPage.getElementById(paginationSelectId);
+        resultsHtmlPage = setSelectedAttribute(s, paginate + "");
+    }
+
+    private void findTotal() {
+        Matcher showingMatcher = showingPattern.matcher(resultsHtmlPage.asText());
+        if (showingMatcher.find()) {
+            total = Integer.parseInt(showingMatcher.group(1));
+        }
+        throw new IllegalArgumentException("Provided page does not contain a match for the Showing regex");
+    }
+
+    private void selectTargetCouncilAndBand(String council, String band) {
+        String value = this.localAuthorityCodes.get(council.toUpperCase());
+        if (!bands.contains(band)) {
+            throw new IllegalArgumentException(String.format("Unknown band: %s", band));
+        }
+        if (value == null) {
+            throw new IllegalArgumentException(String.format("Unknown council: %s", council));
+        }
+        authoritiesSelect.setSelectedAttribute(value, true);
+        councilTaxBandSelect.setSelectedAttribute(band, true);
     }
 
     public int save(HtmlTable t, String council, String band, String page, boolean firstPage) {
@@ -277,6 +297,14 @@ public class VOADownloader {
     }
 
     public void setSaveLocationRoot(String saveLocationRoot) {
-        this.saveLocationRoot = saveLocationRoot;
+        this.saveLocationRoot = saveLocationRoot.replaceAll("^\\~", System.getProperty("user.home"));
+    }
+
+    public void setPaginate(int paginate) {
+        this.paginate = paginate;
+    }
+
+    public void setPaginationSelectId(String paginationSelectId) {
+        this.paginationSelectId = paginationSelectId;
     }
 }
