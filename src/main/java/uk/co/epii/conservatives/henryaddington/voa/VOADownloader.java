@@ -50,11 +50,6 @@ public class VOADownloader {
     private int paginate;
     private long sleepBetweenPageRequests;
 
-    public VOADownloader()
-    {
-        init();
-    }
-
     public HtmlPage getPage(String uri) {
         try {
             return webClient.getPage(uri);
