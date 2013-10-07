@@ -49,6 +49,7 @@ public class VOADownloader {
     private String voaUri;
     private int paginate;
     private long sleepBetweenPageRequests;
+    private String resultsTableTitle;
 
     public HtmlPage getPage(String uri) {
         try {
@@ -250,8 +251,9 @@ public class VOADownloader {
     private HtmlTable getResultsTable() {
         ArrayList<HtmlTable> resultsTables = new ArrayList<HtmlTable>();
         for (DomElement e : resultsHtmlPage.getElementsByTagName("table")) {
-            if (e.getAttribute("title").equals("Search resultsHtmlPage"))
+            if (e.getAttribute("title").equals(resultsTableTitle)) {
                 resultsTables.add((HtmlTable)e);
+            }
         }
         if (resultsTables.isEmpty()) {
             LOG.error("No search resultsHtmlPage found");
@@ -295,7 +297,7 @@ public class VOADownloader {
     }
 
     public void save(HtmlTable table) {
-        LOG.info("Table: {}-{}-{}", new Object[] {council, band, seen});
+        LOG.info("Table: {}-{}-{}", new Object[]{council, band, seen});
         int saved = 0;
         for (HtmlTableBody tableBody : table.getBodies()) {
             for (HtmlTableRow row : tableBody.getRows()) {
@@ -348,5 +350,9 @@ public class VOADownloader {
 
     public void setSleepBetweenPageRequests(long sleepBetweenPageRequests) {
         this.sleepBetweenPageRequests = sleepBetweenPageRequests;
+    }
+
+    public void setResultsTableTitle(String resultsTableTitle) {
+        this.resultsTableTitle = resultsTableTitle;
     }
 }

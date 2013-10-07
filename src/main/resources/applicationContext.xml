@@ -50,5 +50,6 @@
         <property name="saveLocationRoot" value="~/frederickNorth/voa/"/>
         <property name="paginationSelectId" value="lstPageSize"/>
         <property name="sleepBetweenPageRequests" value="1000"/>
+        <property name="resultsTableTitle" value="Search results"/>
     </bean>
 </beans>
