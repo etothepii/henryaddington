@@ -3,7 +3,7 @@
        xsi:schemaLocation="http://www.springframework.org/schema/beans
 	http://www.springframework.org/schema/beans/spring-beans-2.5.xsd">
 
-    <bean id="databaseUploader" class="uk.co.epii.conservatives.henryaddington.DatabaseUploader" init-method="init">
+    <bean id="databaseUploader" class="uk.co.epii.conservatives.henryaddington.DatabaseUploader">
         <property name="createScriptLocation" value="/createAddressBaseTables.sql" />
         <property name="database" value="frederickNorth" />
         <property name="username" value="jrrpl" />
@@ -42,4 +42,15 @@
         <property name="hibernatePrinter" ref="hibernatePrinter"/>
     </bean>
 
+    <bean id="voaDownloader" class="uk.co.epii.conservatives.henryaddington.voa.VOADownloader">
+        <property name="voaUri" value="http://www.voa.gov.uk/cti/RefS.asp?lcn=0"/>
+        <property name="advancedSearchFormId" value="frmRefSForm"/>
+        <property name="localAuthoritySelectId" value="lstBA"/>
+        <property name="councilTaxBandsSelectId" value="lstBand"/>
+        <property name="saveLocationRoot" value="~/frederickNorth/voa/"/>
+        <property name="paginationSelectId" value="lstPageSize"/>
+        <property name="sleepBetweenPageRequests" value="1000"/>
+        <property name="paginate" value="50"/>
+        <property name="resultsTableTitle" value="Search results"/>
+    </bean>
 </beans>

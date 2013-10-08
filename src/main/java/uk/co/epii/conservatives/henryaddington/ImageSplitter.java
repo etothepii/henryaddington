@@ -20,9 +20,9 @@ import java.util.List;
  * Date: 18/08/2013
  * Time: 02:48
  */
-public class ImageSpliter {
+public class ImageSplitter {
 
-    private static final Logger LOG = LoggerFactory.getLogger(ImageSpliter.class);
+    private static final Logger LOG = LoggerFactory.getLogger(ImageSplitter.class);
 
     private final Pattern regex = Pattern.compile("(.*)\\.([^\\.]*)$");
     private final int rows;
@@ -36,15 +36,15 @@ public class ImageSpliter {
     int height;
     private String[][] names;
 
-    public ImageSpliter(String imageFormat, int columns, int rows) {
+    public ImageSplitter(String imageFormat, int columns, int rows) {
         this(imageFormat, columns, rows, null);
     }
 
-    public ImageSpliter(String imageFormat, String[][] names) {
+    public ImageSplitter(String imageFormat, String[][] names) {
         this(imageFormat, names[0].length, names.length, names);
     }
 
-    private ImageSpliter(String imageFormat, int columns, int rows, String[][] names) {
+    private ImageSplitter(String imageFormat, int columns, int rows, String[][] names) {
         this.names = names;
         this.imageFormat = imageFormat;
         this.columns = columns;
