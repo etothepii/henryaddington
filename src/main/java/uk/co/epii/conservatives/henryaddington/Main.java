@@ -26,6 +26,7 @@ public class Main {
     private static String[][] splitDescription;
 
     public static void main(String[] args) {
+        ApplicationContext context = new ClassPathXmlApplicationContext("applicationContext.xml");
         if (args.length > 3 && args[0].equals("NUMERIC_IMAGE_SPLIT")) {
             columns = Integer.parseInt(args[1]);
             rows = Integer.parseInt(args[2]);
@@ -36,7 +37,6 @@ public class Main {
             imageSplit(Arrays.copyOfRange(args, 4, args.length));
         }
         else if (args.length > 0 && args[0].equals("DATABASE")) {
-            ApplicationContext context = new ClassPathXmlApplicationContext("applicationContext.xml");
             DatabaseUploader databaseUploader = (DatabaseUploader)context.getBean("databaseUploader");
             if (databaseUploader.cleanDatabase()) {
                 LOG.info("Successfully Cleaned Database");
@@ -45,8 +45,9 @@ public class Main {
             else {
                 LOG.info("Failed to Cleaned Database");
             }
-            HibernateBuilder hibernateBuilder = (HibernateBuilder)context.getBean("hibernateBuilder");
-            hibernateBuilder.process();
+        }
+        else if (args.length > 0 && args[0].equals("HIBERNATE")) {
+            ((HibernateBuilder)context.getBean("hibernateBuilder")).process();
         }
     }
 

@@ -17,13 +17,15 @@ public class Field {
     private final String hibernateType;
     private final String javaName;
     private final boolean primaryKey;
+    private final boolean nullable;
 
-    Field(String name, String javaType, String hibernateType, boolean primaryKey) {
+    Field(String name, String javaType, String hibernateType, boolean primaryKey, boolean nullable) {
         this.dbName = name;
         this.javaType = javaType;
         this.hibernateType = hibernateType;
         this.javaName = createJavaName(name);
         this.primaryKey = primaryKey;
+        this.nullable = nullable;
     }
 
     private String createJavaName(String name) {
@@ -52,15 +54,29 @@ public class Field {
     static {
         javaTypeMap.put("INT", "int");
         javaTypeMap.put("VARCHAR", "String");
+        javaTypeMap.put("CHAR", "String");
         javaTypeMap.put("TINYTEXT", "String");
         javaTypeMap.put("BIGINT", "long");
         javaTypeMap.put("FLOAT", "float");
         javaTypeMap.put("DATE", "Date");
     }
+
+    private static Map<String, String> javaNullTypeMap = new HashMap<String, String>();
+    static {
+        javaNullTypeMap.put("INT", "Integer");
+        javaNullTypeMap.put("VARCHAR", "String");
+        javaNullTypeMap.put("CHAR", "String");
+        javaNullTypeMap.put("TINYTEXT", "String");
+        javaNullTypeMap.put("BIGINT", "Long");
+        javaNullTypeMap.put("FLOAT", "Float");
+        javaNullTypeMap.put("DATE", "Date");
+    }
+
     private static Map<String, String> hibernateTypeMap = new HashMap<String, String>();
     static {
         hibernateTypeMap.put("INT", "integer");
         hibernateTypeMap.put("VARCHAR", "string");
+        hibernateTypeMap.put("CHAR", "character");
         hibernateTypeMap.put("TINYTEXT", "string");
         hibernateTypeMap.put("BIGINT", "long");
         hibernateTypeMap.put("FLOAT", "float");
@@ -70,10 +86,13 @@ public class Field {
     public static Field parse(String in) {
         Matcher matcher = fieldPattern.matcher(in);
         matcher.find();
+        boolean nullable = !in.contains("NOT NULL");
         return new Field(matcher.group(1),
-                javaTypeMap.get(matcher.group(2).toUpperCase()),
+                nullable ?
+                        javaNullTypeMap.get(matcher.group(2).toUpperCase()) :
+                        javaTypeMap.get(matcher.group(2).toUpperCase()),
                 hibernateTypeMap.get(matcher.group(2).toUpperCase()),
-                in.contains("PRIMARY KEY"));
+                in.contains("PRIMARY KEY"), nullable);
     }
 
     public String getDbName() {
@@ -93,6 +112,10 @@ public class Field {
             return javaName;
         }
         return Character.toUpperCase(javaName.charAt(0)) + javaName.substring(1);
+    }
+
+    public boolean isNullable() {
+        return nullable;
     }
 
     public boolean isPrimaryKey() {

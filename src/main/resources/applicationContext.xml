@@ -27,9 +27,9 @@
     </bean>
 
     <bean id="hibernatePrinter" class="uk.co.epii.conservatives.henryaddington.hibernate.HibernatePrinter">
-        <property name="javaDirectory" value="~/git/conservatives/frederickNorth/src/main/java/uk/co/epii/conservatives/fredericknorth/db"/>
-        <property name="hibernateDirectory" value="~/git/conservatives/frederickNorth/src/main/resources/hibernate"/>
-        <property name="javaPackage" value="uk.co.epii.conservatives.fredericknorth.db" />
+        <property name="javaDirectory" value="~/git/conservatives/williamCavendishBentinck/src/main/java/uk/co/epii/conservatives/williamCavendishBentinck/tables"/>
+        <property name="hibernateDirectory" value="~/git/conservatives/williamCavendishBentinck/src/main/resources/tables"/>
+        <property name="javaPackage" value="uk.co.epii.conservatives.williamcavendishbentinck.tables" />
         <property name="javaImports">
             <list>
                 <value>java.sql.Date</value>
