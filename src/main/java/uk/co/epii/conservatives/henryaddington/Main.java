@@ -30,24 +30,29 @@ public class Main {
     private static String[][] splitDescription;
 
     public static void main(String[] args) {
-        context = new ClassPathXmlApplicationContext("applicationContext.xml");
-        if (args[0].equals("NUMERIC_IMAGE_SPLIT")) {
-            numericImageSplit(args);
+        try {
+            context = new ClassPathXmlApplicationContext("applicationContext.xml");
+            if (args[0].equals("NUMERIC_IMAGE_SPLIT")) {
+                numericImageSplit(args);
+            }
+            else if (args[0].equals("DESCRIBED_IMAGE_SPLIT")) {
+                describedImageSplit(args);
+            }
+            else if (args[0].equals("DATABASE")) {
+                database();
+            }
+            else if (args[0].equals("VOA_MERGE")) {
+                voaMerge(args);
+            }
+            else if (args[0].equals("VOA")) {
+                voa(args);
+            }
+            else if (args[0].equals("VOA_SINGLE_BAND")) {
+                voaSingleBand(args);
+            }
         }
-        else if (args[0].equals("DESCRIBED_IMAGE_SPLIT")) {
-            describedImageSplit(args);
-        }
-        else if (args[0].equals("DATABASE")) {
-            database();
-        }
-        else if (args[0].equals("VOA_MERGE")) {
-            voaMerge(args);
-        }
-        else if (args[0].equals("VOA")) {
-            voa(args);
-        }
-        else if (args[0].equals("VOA_SINGLE_BAND")) {
-            voaSingleBand(args);
+        catch (Throwable t) {
+            LOG.error(t.getMessage(), t);
         }
     }
 
