@@ -19,9 +19,9 @@
         </property>
         <property name="files">
             <list>
-                <value>/Volumes/USB2/AddressBasePremiumCSV/data/AddressBasePremium_FULL_2013-08-06_001.csv</value>
-                <value>/Volumes/USB2/AddressBasePremiumCSV/data/AddressBasePremium_FULL_2013-08-06_002.csv</value>
-                <value>/Volumes/USB2/AddressBasePremiumCSV/data/AddressBasePremium_FULL_2013-08-06_003.csv</value>
+                <value>~/frederickNorth/THH/AddressBasePremium/AddressBasePremium_FULL_2013-08-06_001.csv</value>
+                <value>~/frederickNorth/THH/AddressBasePremium/AddressBasePremium_FULL_2013-08-06_002.csv</value>
+                <value>~/frederickNorth/THH/AddressBasePremium/AddressBasePremium_FULL_2013-08-06_003.csv</value>
             </list>
         </property>
     </bean>
