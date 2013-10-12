@@ -53,4 +53,9 @@
         <property name="paginate" value="50"/>
         <property name="resultsTableTitle" value="Search results"/>
     </bean>
+
+    <bean id="voaUploader" class="uk.co.epii.conservatives.henryaddington.voa.VOAUploader">
+        <property name="dwellingsFolder" value= "~/frederickNorth/Data/dwellings" />
+        <property name="postcodesFolder" value= "~/frederickNorth/Data/codepo_gb/Data/CSV" />
+    </bean>
 </beans>
