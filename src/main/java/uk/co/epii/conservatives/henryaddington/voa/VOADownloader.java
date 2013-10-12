@@ -10,6 +10,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.TreeMap;
 import java.util.regex.Matcher;
@@ -24,7 +25,7 @@ public class VOADownloader {
 
     private static final Logger LOG = LoggerFactory.getLogger(VOADownloader.class);
 
-    private final Pattern showingPattern = Pattern.compile("Showing [0-9]* - [0-9]* of ([0-9]*)");
+    private final Pattern showingPattern = Pattern.compile("Showing ([0-9]*) - ([0-9]*) of ([0-9]*)");
 
     private WebClient webClient;
     private HtmlForm dwellingSearchForm;
@@ -50,6 +51,9 @@ public class VOADownloader {
     private int paginate;
     private long sleepBetweenPageRequests;
     private String resultsTableTitle;
+    private String[] previousPage;
+    private int[] previousRange;
+    private int[] range;
 
     public HtmlPage getPage(String uri) {
         try {
@@ -170,7 +174,13 @@ public class VOADownloader {
         seen = 0;
         while (seen < total) {
             LOG.info("{} - {} loaded: {} of {}", new Object[]{council, band, seen, total});
-            save(getResultsTable());
+            findRange();
+            if (Arrays.equals(previousRange, range)) {
+                LOG.warn("Page repeated, ignoring {} to {}", range);
+            }
+            else {
+                save(getResultsTable());
+            }
             if (isComplete()) {
                 break;
             }
@@ -277,7 +287,19 @@ public class VOADownloader {
     private void findTotal() {
         Matcher showingMatcher = showingPattern.matcher(resultsHtmlPage.asText());
         if (showingMatcher.find()) {
-            total = Integer.parseInt(showingMatcher.group(1));
+            total = Integer.parseInt(showingMatcher.group(3));
+        }
+        else {
+            throw new IllegalArgumentException("Provided page does not contain a match for the Showing regex");
+        }
+    }
+
+    private void findRange() {
+        Matcher showingMatcher = showingPattern.matcher(resultsHtmlPage.asText());
+        if (showingMatcher.find()) {
+            previousRange = range;
+            range = new int[] {Integer.parseInt(showingMatcher.group(1)),
+                               Integer.parseInt(showingMatcher.group(2))};
         }
         else {
             throw new IllegalArgumentException("Provided page does not contain a match for the Showing regex");
@@ -342,6 +364,12 @@ public class VOADownloader {
 
     public void setPaginate(int paginate) {
         this.paginate = paginate;
+        if (previousPage == null) {
+            previousPage = new String[paginate];
+        }
+        else {
+            previousPage = Arrays.copyOf(previousPage, paginate);
+        }
     }
 
     public void setPaginationSelectId(String paginationSelectId) {
