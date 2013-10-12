@@ -33,7 +33,10 @@ public class DatabaseUploader {
     private List<String> files;
 
     public void setFiles(List<String> files) {
-        this.files = files;
+        this.files = new ArrayList<String>(files.size());
+        for (String file : files) {
+            this.files.add(file.replaceAll("^\\~", System.getProperty("user.home")));
+        }
     }
 
     public void setCreateScriptLocation(String createScriptLocation) {

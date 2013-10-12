@@ -1,6 +1,8 @@
 package uk.co.epii.conservatives.henryaddington.hibernate;
 
 import java.io.*;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 /**
@@ -52,7 +54,16 @@ public class HibernatePrinter {
             printWriter.println(" \"http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd\">");
             printWriter.println();
             printWriter.println("<hibernate-mapping>");
-            printWriter.println(String.format("    <class name=\"%s\" table=\"%s\">", table.name, table.name));
+            printWriter.println(String.format("    <class name=\"%s.%s\" table=\"%s\">", javaPackage, table.name, table.name));
+            Collections.sort(table.fields, new Comparator<Field>() {
+                @Override
+                public int compare(Field a, Field b) {
+                    if (a.isPrimaryKey() == b.isPrimaryKey()) {
+                        return 0;
+                    }
+                    return a.isPrimaryKey() ? -1 : 1;
+                }
+            });
             for (Field field : table.fields) {
                 if (field.isPrimaryKey()) {
                     printWriter.println(String.format("        <id name=\"%s\" type=\"%s\" column=\"%s\">",
@@ -60,10 +71,10 @@ public class HibernatePrinter {
                     printWriter.println("            <generator class=\"native\"/>");
                     printWriter.println("        </id>");
                 }
-            }
-            for (Field field : table.fields) {
-                printWriter.println(String.format("        <property name=\"%s\" column=\"%s\" type=\"%s\" />",
-                        field.getJavaName(false), field.getDbName(), field.getHibernateType()));
+                else {
+                    printWriter.println(String.format("        <property name=\"%s\" column=\"%s\" type=\"%s\" />",
+                            field.getJavaName(false), field.getDbName(), field.getHibernateType()));
+                }
             }
             printWriter.println("    </class>");
             printWriter.println("</hibernate-mapping>");
