@@ -1,11 +1,10 @@
 package uk.co.epii.conservatives.henryaddington.voa;
 
+import uk.co.epii.conservatives.williamcavendishbentinck.tables.DeliveryPointAddress;
 import uk.co.epii.spencerperceval.tuple.Duple;
+import uk.co.epii.spencerperceval.util.NeverEmptyHashMap;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 
 /**
  * User: James Robinson
@@ -14,19 +13,18 @@ import java.util.List;
  */
 public class TestDwellingLoader implements DwellingLoader {
 
-    HashMap<String, List<Duple<String, String>>> maps = new HashMap<String, List<Duple<String, String>>>();
+    Map<String, List<DeliveryPointAddress>> maps = new NeverEmptyHashMap<String, List<DeliveryPointAddress>>() {
+        @Override
+        protected List<DeliveryPointAddress> create() {
+            return new ArrayList<DeliveryPointAddress>();
+        }
+    };
 
-    @Override
-    public List<Duple<String, String>> getAddresses(String postcode) {
+    @Override public List<DeliveryPointAddress> getAddresses(String postcode) {
         return maps.get(postcode);
     }
 
-    public void addAll(String postcode, Collection<Duple<String, String>> collection) {
-        List<Duple<String, String>> list = maps.get(postcode);
-        if (list == null) {
-            list = new ArrayList<Duple<String, String>>();
-            maps.put(postcode, list);
-        }
-        list.addAll(collection);
+    public void addAll(String postcode, Collection<DeliveryPointAddress> collection) {
+        maps.get(postcode).addAll(collection);
     }
 }

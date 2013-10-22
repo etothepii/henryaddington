@@ -27,8 +27,10 @@
     </bean>
 
     <bean id="hibernatePrinter" class="uk.co.epii.conservatives.henryaddington.hibernate.HibernatePrinter">
-        <property name="javaDirectory" value="~/git/conservatives/williamCavendishBentinck/src/main/java/uk/co/epii/conservatives/williamCavendishBentinck/tables"/>
-        <property name="hibernateDirectory" value="~/git/conservatives/williamCavendishBentinck/src/main/resources/tables"/>
+        <property name="javaDirectory"
+                  value="~/git/conservatives/williamCavendishBentinck/src/main/java/uk/co/epii/conservatives/williamCavendishBentinck/tables"/>
+        <property name="hibernateDirectory"
+                  value="~/git/conservatives/williamCavendishBentinck/src/main/resources/tables"/>
         <property name="javaPackage" value="uk.co.epii.conservatives.williamcavendishbentinck.tables" />
         <property name="javaImports">
             <list>
@@ -54,8 +56,21 @@
         <property name="resultsTableTitle" value="Search results"/>
     </bean>
 
+    <bean id="databaseSession" class="uk.co.epii.conservatives.williamcavendishbentinck.DatabaseSessionImpl"/>
+
+    <bean id="dwellingLoader" class="uk.co.epii.conservatives.henryaddington.voa.DwellingLoaderImpl">
+        <property name="databaseSession" ref="databaseSession"/>
+    </bean>
+
+    <bean id="dwellingDeliveryPointAddressEquivalence"
+          class="uk.co.epii.conservatives.henryaddington.voa.DwellingDeliveryPointAddressEquivalence">
+    </bean>
+
     <bean id="voaUploader" class="uk.co.epii.conservatives.henryaddington.voa.VOAUploader">
         <property name="dwellingsFolder" value= "~/frederickNorth/Data/dwellings" />
         <property name="postcodesFolder" value= "~/frederickNorth/Data/codepo_gb/Data/CSV" />
+        <property name="databaseSession" ref="databaseSession" />
+        <property name="dwellingLoader" ref="dwellingLoader" />
+        <property name="equivalence" ref="dwellingDeliveryPointAddressEquivalence"/>
     </bean>
 </beans>

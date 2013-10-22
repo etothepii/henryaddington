@@ -4,6 +4,8 @@ import org.junit.Before;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import uk.co.epii.conservatives.williamcavendishbentinck.tables.DeliveryPointAddress;
+import uk.co.epii.conservatives.williamcavendishbentinck.tables.Dwelling;
 import uk.co.epii.spencerperceval.FileLineIterable;
 import uk.co.epii.spencerperceval.tuple.Duple;
 
@@ -41,27 +43,48 @@ public class VOAUploaderTests {
         dwellings.add("9, PRIESTMAN POINT, 2 RAINHILL WAY, LONDON,  E3 3EY~D~NO~671210017");
         dwellings.add("FLAT 1ST FLR 1, HARFORD STREET, LONDON,  E1 4PQ~B~NO~123456789");
         voaUploader.setDwellingLoader(testDwellingLoader);
-        List<Duple<String, String>> list = new ArrayList<Duple<String, String>>();
-        list.add(new Duple<String, String>("101, ZETLAND STREET, LONDON, E14 6PR", "6085480"));
-        list.add(new Duple<String, String>("103, ZETLAND STREET, LONDON, E14 6PR", "6085481"));
-        list.add(new Duple<String, String>("105, ZETLAND STREET, LONDON, E14 6PR", "6085482"));
-        list.add(new Duple<String, String>("107, ZETLAND STREET, LONDON, E14 6PR", "6085483"));
+        List<DeliveryPointAddress> list = new ArrayList<DeliveryPointAddress>();
+        list.add(new DeliveryPointAddress(0, null, 0, 6085480, null, 0, null, null, null, null, 101, null,
+                "ZETLAND STREET", null, null, "LONDON", "E14 6PR", null, null, null, null, null, null, null,
+                null, null, null, null, null));
+        list.add(new DeliveryPointAddress(0, null, 0, 6085481, null, 0, null, null, null, null, 103, null,
+                "ZETLAND STREET", null, null, "LONDON", "E14 6PR", null, null, null, null, null, null, null,
+                null, null, null, null, null));
+        list.add(new DeliveryPointAddress(0, null, 0, 6085482, null, 0, null, null, null, null, 105, null,
+                "ZETLAND STREET", null, null, "LONDON", "E14 6PR", null, null, null, null, null, null, null,
+                null, null, null, null, null));
+        list.add(new DeliveryPointAddress(0, null, 0, 6085483, null, 0, null, null, null, null, 107, null,
+                "ZETLAND STREET", null, null, "LONDON", "E14 6PR", null, null, null, null, null, null, null,
+                null, null, null, null, null));
         testDwellingLoader.addAll("E14 6PR", list);
-        list = new ArrayList<Duple<String, String>>();
-        list.add(new Duple<String, String>("FLAT 5, PRIESTMAN POINT, 2, RAINHILL WAY, LONDON, E3 3EY", "6167205"));
-        list.add(new Duple<String, String>("FLAT 7, PRIESTMAN POINT, 2, RAINHILL WAY, LONDON, E3 3EY", "6167207"));
-        list.add(new Duple<String, String>("FLAT 8, PRIESTMAN POINT, 2, RAINHILL WAY, LONDON, E3 3EY", "6167208"));
-        list.add(new Duple<String, String>("FLAT 9, PRIESTMAN POINT, 2, RAINHILL WAY, LONDON, E3 3EY", "6167209"));
+        list = new ArrayList<DeliveryPointAddress>();
+        list.add(new DeliveryPointAddress(0, null, 0, 6167205, null, 0, null, null, "FLAT 5", "PRIESTMAN POINT",
+                2, null, "RAINHILL WAY", null, null, "LONDON", "E3 3EY", null, null, null, null, null, null, null,
+                null, null, null, null, null));
+        list.add(new DeliveryPointAddress(0, null, 0, 6167207, null, 0, null, null, "FLAT 7", "PRIESTMAN POINT",
+                2, null, "RAINHILL WAY", null, null, "LONDON", "E3 3EY", null, null, null, null, null, null, null,
+                null, null, null, null, null));
+        list.add(new DeliveryPointAddress(0, null, 0, 6167208, null, 0, null, null, "FLAT 8", "PRIESTMAN POINT",
+                2, null, "RAINHILL WAY", null, null, "LONDON", "E3 3EY", null, null, null, null, null, null, null,
+                null, null, null, null, null));
+        list.add(new DeliveryPointAddress(0, null, 0, 6167209, null, 0, null, null, "FLAT 9", "PRIESTMAN POINT",
+                2, null, "RAINHILL WAY", null, null, "LONDON", "E3 3EY", null, null, null, null, null, null, null,
+                null, null, null, null, null));
         testDwellingLoader.addAll("E3 3EY", list);
-        list = new ArrayList<Duple<String, String>>();
-        list.add(new Duple<String, String>("11, HARFORD STREET, LONDON, E1 4PQ", "6048547"));
+        list = new ArrayList<DeliveryPointAddress>();
+        list.add(new DeliveryPointAddress(0, null, 0, 6048547, null, 0, null, null, null, null,
+                11, null, "HARFORD STREET", null, null, "LONDON", "E1 4PQ", null, null, null, null, null, null, null,
+                null, null, null, null, null));
         testDwellingLoader.addAll("E1 4PQ", list);
 
     }
 
     @Test
     public void processDwellingsTest() {
-        List<Duple<String, String>> result = voaUploader.processDwellings(dwellings);
+        List<Duple<String, String>> result = new ArrayList<Duple<String, String>>();
+        for (Dwelling dwelling : voaUploader.processDwellings(dwellings)) {
+            result.add(new Duple<String, String>(dwelling.getUprn() + "", dwelling.getCouncilTaxBand() + ""));
+        }
         List<Duple<String, String>> expected = new ArrayList<Duple<String, String>>(8);
         expected.add(new Duple<String, String>("6167205", "D"));
         expected.add(new Duple<String, String>("6167207", "D"));
@@ -73,20 +96,6 @@ public class VOAUploaderTests {
         expected.add(new Duple<String, String>("6085483", "C"));
         expected.add(new Duple<String, String>("6048547", "B"));
         assertCollection(expected, result);
-    }
-
-    @Test
-    public void removeFlatTest() {
-        String result = voaUploader.removeFlat("FLAT 1ST FLR 1, HARFORD STREET, LONDON");
-        String expected = "11, HARFORD STREET, LONDON";
-        assertEquals(expected, result);
-    }
-
-    @Test
-    public void processDwellingsTestSpoof() {
-        voaUploader.setDwellingLoader(new DwellingLoaderImpl());
-        voaUploader.processDwellings(new FileLineIterable(
-                String.format("%s/frederickNorth/Data/dwellings/TOWER HAMLETS.txt", System.getProperty("user.home"))));
     }
 
     public void assertCollection(Collection<?> expectedCollection, Collection<?> actualCollection) {

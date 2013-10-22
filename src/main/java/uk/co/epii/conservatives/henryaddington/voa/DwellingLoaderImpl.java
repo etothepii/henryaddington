@@ -18,8 +18,15 @@ public class DwellingLoaderImpl implements DwellingLoader {
 
     private DatabaseSession databaseSession;
 
-    public DwellingLoaderImpl() {
-        databaseSession = new DatabaseSession();
+    public DatabaseSession getDatabaseSession() {
+        return databaseSession;
+    }
+
+    public void setDatabaseSession(DatabaseSession databaseSession) {
+        this.databaseSession = databaseSession;
+    }
+
+    private DwellingLoaderImpl() {
     }
 
     @Override
