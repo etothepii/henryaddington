@@ -76,7 +76,7 @@ public class VOAUploaderTests {
                 11, null, "HARFORD STREET", null, null, "LONDON", "E1 4PQ", null, null, null, null, null, null, null,
                 null, null, null, null, null));
         testDwellingLoader.addAll("E1 4PQ", list);
-
+        voaUploader.setEquivalence(new DwellingDeliveryPointAddressEquivalence());
     }
 
     @Test

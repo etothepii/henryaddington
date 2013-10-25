@@ -34,6 +34,7 @@ public class DwellingDeliveryPointAddressEquivalence implements Equivalence<Dwel
     public Map<Dwelling, DeliveryPointAddress> match(List<Dwelling> dwellings, List<DeliveryPointAddress> addresses) {
         restart(dwellings, addresses);
         matchGroupsByName();
+        matchGroupsByNameOfBuilding();
         matchGroupsBySize();
         matchGroupsByApproximateSize();
         if (onlyOneGroupOfEach()) {
@@ -42,13 +43,13 @@ public class DwellingDeliveryPointAddressEquivalence implements Equivalence<Dwel
         for (StubDwelling stubDwelling : unmatchedDwellings) {
             Dwelling dwelling = stubDwellingMap.get(stubDwelling);
             matched.put(dwelling, null);
-            LOG.debug("Failed to match: {}", stubDwelling);
+            LOG.debug("Failed to match: {}, {}, {}", new Object[]{dwelling.getLarn(), dwelling.getPostcode(), stubDwelling});
         }
         for (Group<StubDwelling> group : dwellingGroups) {
             for (StubDwelling stubDwelling : group) {
                 Dwelling dwelling = stubDwellingMap.get(stubDwelling);
                 matched.put(dwelling, null);
-                LOG.debug("Failed to match: {}", stubDwelling);
+                LOG.debug("Failed to match: {}, {}, {}", new Object[]{dwelling.getLarn(), dwelling.getPostcode(), stubDwelling});
             }
         }
         return matched;
@@ -56,16 +57,24 @@ public class DwellingDeliveryPointAddressEquivalence implements Equivalence<Dwel
 
     private void matchGroupsByApproximateSize() {
         for (int i = 0; i < dwellingGroups.size(); i++) {
-            int maxSize = (int)Math.round(Math.ceil(dwellingGroups.size() * Math.E));
-            int minSize = (int)Math.round(Math.floor(dwellingGroups.size() / Math.E));
+            int maxSize = (int)Math.round(Math.ceil(dwellingGroups.get(i).size() * Math.E));
+            int minSize = (int)Math.round(Math.floor(dwellingGroups.get(i).size() / Math.E));
             int addressMatch = -1;
             for (int j = 0; j < addressGroups.size(); j++) {
-                if (addressGroups.get(j).size() <= maxSize && addressGroups.get(j).size() >= minSize) {
-                    if (addressMatch == -1) {
-                        addressMatch = j;
+                if (addressMatch == -1) {
+                    if (addressGroups.get(j).size() <= maxSize && addressGroups.get(j).size() >= minSize) {
+                        if (addressGroups.get(j).size() <= (int)Math.round(Math.ceil(dwellingGroups.get(i).size() * Math.sqrt(Math.E))) &&
+                                addressGroups.get(j).size() >= (int)Math.round(Math.floor(dwellingGroups.get(i).size() / Math.sqrt(Math.E)))) {
+                            addressMatch = j;
+                        }
+                        else {
+                            addressMatch = -2;
+                            break;
+                        }
                     }
                     else if (addressMatch >= 0) {
                         addressMatch = -2;
+                        break;
                     }
                 }
             }
@@ -81,7 +90,28 @@ public class DwellingDeliveryPointAddressEquivalence implements Equivalence<Dwel
                 String commonDwelling = compress(dwellingGroups.get(i).getCommon().toString());
                 String commonAddress = compress(addressGroups.get(j).getCommon().toString());
                 if (commonDwelling.equals(commonAddress)) {
-                    process(dwellingGroups.remove(i--), addressGroups.remove(j));
+                    Group<StubDwelling> dwellingGroup = dwellingGroups.get(i);
+                    Group<StubDeliveryPointAddress> addressGroup = addressGroups.get(j);
+                    process(dwellingGroup, addressGroup);
+                }
+            }
+        }
+    }
+
+    private void matchGroupsByNameOfBuilding() {
+        for (int i = 0; i < dwellingGroups.size(); i++) {
+            for (int j = 0; j < addressGroups.size(); j++) {
+                if (addressGroups.get(j).size() != 1) {
+                    continue;
+                }
+                String commonDwelling = compress(dwellingGroups.get(i).getCommon().toString());
+                String commonAddress = compress(addressGroups.get(j).getCommon().toString());
+                if (commonDwelling.contains(commonAddress)) {
+                    Group<StubDwelling> dwellingGroup = dwellingGroups.remove(i--);
+                    DeliveryPointAddress address = stubAddressMap.get(addressGroups.remove(j).get(0));
+                    for (StubDwelling dwelling : dwellingGroup) {
+                        matched.put(stubDwellingMap.get(dwelling), address);
+                    }
                     break;
                 }
             }
@@ -129,15 +159,12 @@ public class DwellingDeliveryPointAddressEquivalence implements Equivalence<Dwel
 
     private void process(Group<StubDwelling> dwellings, Group<StubDeliveryPointAddress> addresses) {
         if (dwellings.size() == 1 && addresses.size() == 1) {
-            DeliveryPointAddress matchedAddress = stubAddressMap.get(addresses.get(0));
-            Dwelling matchedDwelling = stubDwellingMap.get(dwellings.get(0));
+            DeliveryPointAddress matchedAddress = stubAddressMap.remove(addresses.get(0));
+            Dwelling matchedDwelling = stubDwellingMap.remove(dwellings.get(0));
             matched.put(matchedDwelling, matchedAddress);
             return;
         }
         matchDeltas(addresses, dwellings);
-        for (StubDwelling dwelling : dwellings) {
-            unmatchedDwellings.add(dwelling);
-        }
     }
 
     private void matchDeltas(Group<StubDeliveryPointAddress> addresses,
@@ -149,6 +176,7 @@ public class DwellingDeliveryPointAddressEquivalence implements Equivalence<Dwel
                 addressDifference = address.toString();
             }
             addressDifference = compress(addressDifference);
+            int matchAt = -1;
             for (int j = 0; j < dwellings.size(); j++) {
                 StubDwelling dwelling = dwellings.get(j);
                 String dwellingDifference = dwellings.getCommon().getDifference(dwelling);
@@ -157,11 +185,19 @@ public class DwellingDeliveryPointAddressEquivalence implements Equivalence<Dwel
                 }
                 dwellingDifference = compress(dwellingDifference);
                 if (dwellingDifference.equals(addressDifference)) {
-                    matched.put(
-                            stubDwellingMap.get(dwellings.remove(j)),
-                            stubAddressMap.get(addresses.remove(i--)));
-                    break;
+                    if (matchAt == -1) {
+                        matchAt = j;
+                    }
+                    else {
+                        matchAt = -2;
+                        break;
+                    }
                 }
+            }
+            if (matchAt >= 0) {
+                matched.put(
+                        stubDwellingMap.get(dwellings.remove(matchAt)),
+                        stubAddressMap.get(addresses.remove(i--)));
             }
         }
     }

@@ -15,8 +15,15 @@ public class ArrayExtensions {
         int increment = 1;
         int multiplicand = 1;
         for (int i = 0; i < a.length; i++) {
-            if ((b[i] == null && a[i] != null) ||
-                    (b[i] != null && !b[i].equals(a[i]))) {
+            if ((b[i] == null && a[i] != null) || (b[i] != null && !b[i].equals(a[i]))) {
+                if (a[i] != null && b[i] != null) {
+                    if ((a[i].contains("|") && a[i].length() > 2) ||
+                            (b[i].contains("|") && b[i].length() > 2)) {
+                        if (StringExtensions.common(a[i], b[i]) == null) {
+                            increment *= 2;
+                        }
+                    }
+                }
                 d += increment;
                 multiplicand = 2;
             }

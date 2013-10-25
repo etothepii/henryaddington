@@ -117,7 +117,7 @@ public class StubDwelling implements Groupable<StubDwelling> {
     public String toString() {
         StringBuilder stringBuilder = new StringBuilder();
         for (String addressLine : address) {
-            if (addressLine == null) {
+            if (addressLine == null || addressLine.contains("|")) {
                 continue;
             }
             if (stringBuilder.length() > 0) {
