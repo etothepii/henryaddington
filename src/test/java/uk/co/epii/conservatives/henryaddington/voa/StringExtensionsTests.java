@@ -24,6 +24,7 @@ public class StringExtensionsTests {
         String expected = "FLAT | AT 13B";
         assertEquals(expected, result);
     }
+
     @Test
     public void commonTest3() {
         String result = StringExtensions.common("FLAT 1ST FLR AT 31", "FLAT 2ND FLR AT 31");
@@ -35,6 +36,20 @@ public class StringExtensionsTests {
     public void commonTest4() {
         String result = StringExtensions.common("1", "2");
         String expected = null;
+        assertEquals(expected, result);
+    }
+
+    @Test
+    public void commonTest5() {
+        String result = StringExtensions.common("FLAT 151A FLR AT 31", "FLAT 151B FLR AT 31");
+        String expected = "FLAT | FLR AT 31";
+        assertEquals(expected, result);
+    }
+
+    @Test
+    public void commonTest6() {
+        String result = StringExtensions.common("FLAT 1001 FLR AT 31", "FLAT 1002 FLR AT 31");
+        String expected = "FLAT | FLR AT 31";
         assertEquals(expected, result);
     }
 

@@ -43,13 +43,14 @@ public class DwellingDeliveryPointAddressEquivalence implements Equivalence<Dwel
         for (StubDwelling stubDwelling : unmatchedDwellings) {
             Dwelling dwelling = stubDwellingMap.get(stubDwelling);
             matched.put(dwelling, null);
-            LOG.debug("Failed to match: {}, {}, {}", new Object[]{dwelling.getLarn(), dwelling.getPostcode(), stubDwelling});
         }
         for (Group<StubDwelling> group : dwellingGroups) {
             for (StubDwelling stubDwelling : group) {
                 Dwelling dwelling = stubDwellingMap.get(stubDwelling);
                 matched.put(dwelling, null);
-                LOG.debug("Failed to match: {}, {}, {}", new Object[]{dwelling.getLarn(), dwelling.getPostcode(), stubDwelling});
+            }
+            if (!group.isEmpty()) {
+                LOG.debug("Unmatched group: {} {}", new Object[] {group.getCommon(), group.size()});
             }
         }
         return matched;

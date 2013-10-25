@@ -42,7 +42,7 @@ public class StringExtensions {
                 String begin = b.substring(0, j);
                 String end = b.substring(j + i);
                 if (a.startsWith(begin) && a.endsWith(end)) {
-                    return String.format("%s|%s", begin, end);
+                    return String.format("%s|%s", begin, end).replaceAll("[^ ]*\\|[^ ]*", "|");
                 }
             }
         }

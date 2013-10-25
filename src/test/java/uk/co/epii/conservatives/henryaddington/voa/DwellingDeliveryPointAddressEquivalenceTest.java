@@ -277,10 +277,10 @@ public class DwellingDeliveryPointAddressEquivalenceTest {
     }
 
     @Test
-    public void testE17HS() {
+    public void testPostcode() {
         DatabaseSession databaseSession = new DatabaseSessionImpl();
         Session session = databaseSession.getSessionFactory().openSession();
-        String postcode = "E1 7HS";
+        String postcode = "E1 4PE";
         String addressSql = "SELECT * FROM DeliveryPointAddress WHERE POSTCODE = :postcode";
         SQLQuery query = session.createSQLQuery(addressSql);
         query.addEntity(DeliveryPointAddress.class);

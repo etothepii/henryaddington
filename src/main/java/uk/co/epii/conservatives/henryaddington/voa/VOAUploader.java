@@ -26,7 +26,7 @@ public class VOAUploader {
     private static final Logger LOG = LoggerFactory.getLogger(VOAUploader.class);
 
     private final Pattern postcodeFinderPattern = Pattern.compile(".* ([A-Z0-9]* [A-Z0-9]*)~.*");
-    private final Pattern postcodeAreaPattern = Pattern.compile("^[A-Z]*");
+    private final Pattern postcodeAreaPattern = Pattern.compile("^([A-Z]*)[^A-Z].*");
     private final Pattern postcodeDataPattern = Pattern.compile("^\"([A-Z][A-Z0-9]*) +([0-9][A-Z]+)\",([0-9]*),([0-9]*),([0-9]*),");
     private final Comparator<Duple<String, String>> firstComparator = new Comparator<Duple<String, String>>() {
         @Override
@@ -98,6 +98,12 @@ public class VOAUploader {
         for (File file : new File(dwellingsFolder).listFiles()) {
             List<Dwelling> dwellings = processDwellings(new FileLineIterable(file));
             databaseSession.upload(dwellings);
+            for (Dwelling dwelling : dwellings) {
+                Matcher matcher = postcodeAreaPattern.matcher(dwelling.getPostcode());
+                if (matcher.matches()) {
+                    postcodeAreas.add(matcher.group(1));
+                }
+            }
         }
         processPostcodeAreas();
     }
@@ -137,6 +143,7 @@ public class VOAUploader {
         String postcode = group.getFirst();
         List<Dwelling> dwellings = group.getSecond();
         List<DeliveryPointAddress> addresses = dwellingLoader.getAddresses(postcode);
+        LOG.debug("Postcode: {} {}", postcode, dwellings.size());
         Map<Dwelling, DeliveryPointAddress> matchedDwellingAddresses = equivalence.match(dwellings, addresses);
         for (Dwelling dwelling : dwellings) {
             DeliveryPointAddress dwellingAddress = matchedDwellingAddresses.get(dwelling);
