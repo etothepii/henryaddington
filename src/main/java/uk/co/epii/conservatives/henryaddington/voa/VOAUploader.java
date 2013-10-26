@@ -109,8 +109,9 @@ public class VOAUploader {
     }
 
     private void processPostcodeAreas() {
+        LOG.debug("Postcodes: {}", postcodeAreas.size());
         for (String postcodeArea : postcodeAreas) {
-            loadPostcodeFile(String.format("%s/%s.csv", postcodesFolder, postcodeArea));
+            loadPostcodeFile(String.format("%s/%s.csv", postcodesFolder, postcodeArea.toLowerCase()));
         }
     }
 
