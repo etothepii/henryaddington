@@ -1,5 +1,7 @@
 package uk.co.epii.conservatives.henryaddington.voa;
 
+import java.util.regex.Pattern;
+
 /**
  * User: James Robinson
  * Date: 21/10/2013
@@ -65,4 +67,5 @@ public class StringExtensions {
         return different.substring(
                 split[0].length(), different.length() - split[1].length());
     }
+
 }

@@ -18,9 +18,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
-import static junit.framework.Assert.assertEquals;
-import static junit.framework.Assert.assertNull;
-import static junit.framework.Assert.assertTrue;
+import static junit.framework.Assert.*;
 
 /**
  * User: James Robinson
@@ -198,8 +196,8 @@ public class DwellingDeliveryPointAddressEquivalenceTest {
         });
         Map<String, Long> idMatches = new HashMap<String, Long>();
         for (Map.Entry<Dwelling, DeliveryPointAddress> entry : instance.match(dwellings, addresses).entrySet()) {
-            idMatches.put(entry.getKey() == null ? null : entry.getKey().getLarn(),
-                    entry.getValue() == null ? null : entry.getValue().getUprn());
+            if (entry.getKey() == null) continue;
+            idMatches.put(entry.getKey().getLarn(), entry.getValue() == null ? null : entry.getValue().getUprn());
         }
         assertEquals("Size", 1, idMatches.size());
         assertEquals("100400102", (Long) 6064892l, idMatches.get("100400102"));
@@ -213,26 +211,30 @@ public class DwellingDeliveryPointAddressEquivalenceTest {
                 new Dwelling("3, ABBOTT HOUSE, SMYTHE STREET, LONDON", "E14 0HD", 'C', "100400306", null, null),
                 new Dwelling("4, ABBOTT HOUSE, SMYTHE STREET, LONDON", "E14 0HD", 'C', "100400403", null, null),
                 new Dwelling("5, ABBOTT HOUSE, SMYTHE STREET, LONDON", "E14 0HD", 'C', "100400500", null, null),
-                new Dwelling("10, ABBOTT HOUSE, SMYTHE STREET, LONDON", "E14 0HD", 'C', "100400500", null, null),
+                new Dwelling("10, ABBOTT HOUSE, SMYTHE STREET, LONDON", "E14 0HD", 'C', "100400501", null, null),
+                new Dwelling("11, ABBOTT HOUSE, SMYTHE STREET, LONDON", "E14 0HD", 'C', "100400502", null, null),
         });
         List<DeliveryPointAddress> addresses = Arrays.asList(new DeliveryPointAddress[]{
                 new DeliveryPointAddress(0, null, 0, 6064892, null, 0, null, null,
-                        "FLAT 1", "ABBOT HOUSE", null, null, "SMYTHE STREET", null, null, "LONDON", "E14 0HD",
+                        "FLAT 1", "ABBOTT HOUSE", null, null, "SMYTHE STREET", null, null, "LONDON", "E14 0HD",
                         null, null, null, null, null, null, null, null, null, null, null, null),
                 new DeliveryPointAddress(0, null, 0, 6064893, null, 0, null, null,
-                        "FLAT 2", "ABBOT HOUSE", null, null, "SMYTHE STREET", null, null, "LONDON", "E14 0HD",
+                        "FLAT 2", "ABBOTT HOUSE", null, null, "SMYTHE STREET", null, null, "LONDON", "E14 0HD",
                         null, null, null, null, null, null, null, null, null, null, null, null),
                 new DeliveryPointAddress(0, null, 0, 6064894, null, 0, null, null,
-                        "FLAT 3", "ABBOT HOUSE", null, null, "SMYTHE STREET", null, null, "LONDON", "E14 0HD",
+                        "FLAT 3", "ABBOTT HOUSE", null, null, "SMYTHE STREET", null, null, "LONDON", "E14 0HD",
                         null, null, null, null, null, null, null, null, null, null, null, null),
                 new DeliveryPointAddress(0, null, 0, 6064895, null, 0, null, null,
-                        "FLAT 4", "ABBOT HOUSE", null, null, "SMYTHE STREET", null, null, "LONDON", "E14 0HD",
+                        "FLAT 4", "ABBOTT HOUSE", null, null, "SMYTHE STREET", null, null, "LONDON", "E14 0HD",
                         null, null, null, null, null, null, null, null, null, null, null, null),
                 new DeliveryPointAddress(0, null, 0, 6064896, null, 0, null, null,
-                        "FLAT 5", "ABBOT HOUSE", null, null, "SMYTHE STREET", null, null, "LONDON", "E14 0HD",
+                        "FLAT 5", "ABBOTT HOUSE", null, null, "SMYTHE STREET", null, null, "LONDON", "E14 0HD",
                         null, null, null, null, null, null, null, null, null, null, null, null),
                 new DeliveryPointAddress(0, null, 0, 6064901, null, 0, null, null,
-                        "UNIT 10", "ABBOT HOUSE", null, null, "SMYTHE STREET", null, null, "LONDON", "E14 0HD",
+                        "UNIT 10", "ABBOTT HOUSE", null, null, "SMYTHE STREET", null, null, "LONDON", "E14 0HD",
+                        null, null, null, null, null, null, null, null, null, null, null, null),
+                new DeliveryPointAddress(0, null, 0, 6064902, null, 0, null, null,
+                        "UNIT 11", "ABBOTT HOUSE", null, null, "SMYTHE STREET", null, null, "LONDON", "E14 0HD",
                         null, null, null, null, null, null, null, null, null, null, null, null)
         });
         Map<String, Long> idMatches = new HashMap<String, Long>();
@@ -240,12 +242,14 @@ public class DwellingDeliveryPointAddressEquivalenceTest {
             idMatches.put(entry.getKey() == null ? null : entry.getKey().getLarn(),
                     entry.getValue() == null ? null : entry.getValue().getUprn());
         }
-        assertEquals("Size", 5, idMatches.size());
+        assertEquals("Size", 7, idMatches.size());
         assertEquals("100400102", (Long)6064892l, idMatches.get("100400102"));
         assertEquals("100400209", (Long)6064893l, idMatches.get("100400209"));
         assertEquals("100400306", (Long)6064894l, idMatches.get("100400306"));
         assertEquals("100400403", (Long)6064895l, idMatches.get("100400403"));
         assertEquals("100400500", (Long)6064896l, idMatches.get("100400500"));
+        assertEquals("100400501", (Long)6064901l, idMatches.get("100400501"));
+        assertEquals("100400502", (Long)6064902l, idMatches.get("100400502"));
     }
 
     @Test

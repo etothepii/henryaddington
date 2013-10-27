@@ -6,12 +6,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import uk.co.epii.conservatives.williamcavendishbentinck.tables.DeliveryPointAddress;
 import uk.co.epii.conservatives.williamcavendishbentinck.tables.Dwelling;
+import uk.co.epii.conservatives.williamcavendishbentinck.tables.Postcode;
 import uk.co.epii.spencerperceval.FileLineIterable;
 import uk.co.epii.spencerperceval.tuple.Duple;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
+import java.util.*;
 
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertNotNull;
@@ -26,13 +25,19 @@ import static junit.framework.Assert.assertTrue;
 public class VOAUploaderTests {
 
     private static final Logger LOG = LoggerFactory.getLogger(VOAUploaderTests.class);
-
+    private TestPostcodeLoader postcodeLoader = new TestPostcodeLoader();
     private VOAUploader voaUploader = new VOAUploader();
     private List<String> dwellings = new ArrayList<String>();
     private TestDwellingLoader testDwellingLoader = new TestDwellingLoader();
 
     @Before
     public void setUp() {
+        Map<String, Postcode> postcodes = new HashMap<String, Postcode>();
+        postcodes.put("E1 4PQ", new Postcode("E1 4PQ", 10, 536121f, 182267f));
+        postcodes.put("E14 6PR", new Postcode("E1 4PQ", 10, 538020f, 181688f));
+        postcodes.put("E3 3EY", new Postcode("E1 4PQ", 10, 537539f, 182580f));
+        postcodeLoader.setPostcodes(postcodes);
+        voaUploader.setPostcodeLoader(postcodeLoader);
         dwellings.add("101, ZETLAND STREET, LONDON,  E14 6PR~C~NO~898406502");
         dwellings.add("103, ZETLAND STREET, LONDON,  E14 6PR~C~NO~898406609");
         dwellings.add("105, ZETLAND STREET, LONDON,  E14 6PR~C~NO~898406706");
@@ -56,7 +61,7 @@ public class VOAUploaderTests {
         list.add(new DeliveryPointAddress(0, null, 0, 6085483, null, 0, null, null, null, null, 107, null,
                 "ZETLAND STREET", null, null, "LONDON", "E14 6PR", null, null, null, null, null, null, null,
                 null, null, null, null, null));
-        testDwellingLoader.addAll("E14 6PR", list);
+        testDwellingLoader.addAll(postcodeLoader.getPostcode("E14 6PR"), list);
         list = new ArrayList<DeliveryPointAddress>();
         list.add(new DeliveryPointAddress(0, null, 0, 6167205, null, 0, null, null, "FLAT 5", "PRIESTMAN POINT",
                 2, null, "RAINHILL WAY", null, null, "LONDON", "E3 3EY", null, null, null, null, null, null, null,
@@ -70,12 +75,12 @@ public class VOAUploaderTests {
         list.add(new DeliveryPointAddress(0, null, 0, 6167209, null, 0, null, null, "FLAT 9", "PRIESTMAN POINT",
                 2, null, "RAINHILL WAY", null, null, "LONDON", "E3 3EY", null, null, null, null, null, null, null,
                 null, null, null, null, null));
-        testDwellingLoader.addAll("E3 3EY", list);
+        testDwellingLoader.addAll(postcodeLoader.getPostcode("E3 3EY"), list);
         list = new ArrayList<DeliveryPointAddress>();
         list.add(new DeliveryPointAddress(0, null, 0, 6048547, null, 0, null, null, null, null,
                 11, null, "HARFORD STREET", null, null, "LONDON", "E1 4PQ", null, null, null, null, null, null, null,
                 null, null, null, null, null));
-        testDwellingLoader.addAll("E1 4PQ", list);
+        testDwellingLoader.addAll(postcodeLoader.getPostcode("E1 4PQ"), list);
         voaUploader.setEquivalence(new DwellingDeliveryPointAddressEquivalence());
     }
 

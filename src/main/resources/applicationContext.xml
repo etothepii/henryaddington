@@ -63,14 +63,22 @@
     </bean>
 
     <bean id="dwellingDeliveryPointAddressEquivalence"
-          class="uk.co.epii.conservatives.henryaddington.voa.DwellingDeliveryPointAddressEquivalence">
+          class="uk.co.epii.conservatives.henryaddington.voa.DwellingDeliveryPointAddressEquivalence" />
+
+    <bean id="postcodeMatcher" class="uk.co.epii.spencerperceval.data.PostcodeMatcher" init-method="init" />
+
+    <bean id="postcodeLoader" class="uk.co.epii.conservatives.henryaddington.voa.PostcodeLoaderImpl">
+        <property name="postcodeMatcher" ref="postcodeMatcher"/>
+        <property name="databaseSession" ref="databaseSession" />
+        <property name="postcodesFolder" value= "~/frederickNorth/Data/codepo_gb/Data/CSV" />
     </bean>
 
     <bean id="voaUploader" class="uk.co.epii.conservatives.henryaddington.voa.VOAUploader">
         <property name="dwellingsFolder" value= "~/frederickNorth/Data/dwellings" />
-        <property name="postcodesFolder" value= "~/frederickNorth/Data/codepo_gb/Data/CSV" />
-        <property name="databaseSession" ref="databaseSession" />
         <property name="dwellingLoader" ref="dwellingLoader" />
+        <property name="databaseSession" ref="databaseSession" />
         <property name="equivalence" ref="dwellingDeliveryPointAddressEquivalence"/>
+        <property name="searchRadius" value="100"/>
+        <property name="postcodeLoader" ref="postcodeLoader"/>
     </bean>
 </beans>

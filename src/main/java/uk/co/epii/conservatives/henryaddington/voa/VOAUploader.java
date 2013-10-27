@@ -7,14 +7,14 @@ import uk.co.epii.conservatives.williamcavendishbentinck.tables.DeliveryPointAdd
 import uk.co.epii.conservatives.williamcavendishbentinck.tables.Dwelling;
 import uk.co.epii.conservatives.williamcavendishbentinck.tables.Postcode;
 import uk.co.epii.spencerperceval.FileLineIterable;
+import uk.co.epii.spencerperceval.data.PostcodeMatcher;
 import uk.co.epii.spencerperceval.tuple.Duple;
 import uk.co.epii.spencerperceval.util.Equivalence;
 import uk.co.epii.spencerperceval.util.NeverEmptyHashMap;
 
+import java.awt.geom.Point2D;
 import java.io.File;
 import java.util.*;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 /**
  * User: James Robinson
@@ -25,9 +25,6 @@ public class VOAUploader {
 
     private static final Logger LOG = LoggerFactory.getLogger(VOAUploader.class);
 
-    private final Pattern postcodeFinderPattern = Pattern.compile(".* ([A-Z0-9]* [A-Z0-9]*)~.*");
-    private final Pattern postcodeAreaPattern = Pattern.compile("^([A-Z]*)[^A-Z].*");
-    private final Pattern postcodeDataPattern = Pattern.compile("^\"([A-Z][A-Z0-9]*) +([0-9][A-Z]+)\",([0-9]*),([0-9]*),([0-9]*),");
     private final Comparator<Duple<String, String>> firstComparator = new Comparator<Duple<String, String>>() {
         @Override
         public int compare(Duple<String, String> o1, Duple<String, String> o2) {
@@ -42,27 +39,37 @@ public class VOAUploader {
     };
 
     private String dwellingsFolder;
-    private String postcodesFolder;
     private DwellingLoader dwellingLoader;
     private DatabaseSession databaseSession;
+    private float searchRadius;
     private List<Dwelling> dwellings;
-    private Set<String> postcodeAreas;
     private Equivalence<Dwelling, DeliveryPointAddress> equivalence;
+    private PostcodeLoader postcodeLoader;
+    private Map<Dwelling, DeliveryPointAddress> matchedDwellingAddresses;
+
+    public float getSearchRadius() {
+        return searchRadius;
+    }
+
+    public void setSearchRadius(float searchRadius) {
+        this.searchRadius = searchRadius;
+    }
+
+    public PostcodeLoader getPostcodeLoader() {
+        return postcodeLoader;
+    }
+
+    public void setPostcodeLoader(PostcodeLoader postcodeLoader) {
+        this.postcodeLoader = postcodeLoader;
+    }
 
     public String getDwellingsFolder() {
         return dwellingsFolder;
+
     }
 
     public void setDwellingsFolder(String dwellingsFolder) {
         this.dwellingsFolder = dwellingsFolder.replaceAll("^~", System.getProperty("user.home"));
-    }
-
-    public String getPostcodesFolder() {
-        return postcodesFolder;
-    }
-
-    public void setPostcodesFolder(String postcodesFolder) {
-        this.postcodesFolder = postcodesFolder.replaceAll("^~", System.getProperty("user.home"));
     }
 
     public DatabaseSession getDatabaseSession() {
@@ -94,41 +101,10 @@ public class VOAUploader {
     }
 
     public void processDwellings() {
-        postcodeAreas = new HashSet<String>();
         for (File file : new File(dwellingsFolder).listFiles()) {
             List<Dwelling> dwellings = processDwellings(new FileLineIterable(file));
             databaseSession.upload(dwellings);
-            for (Dwelling dwelling : dwellings) {
-                Matcher matcher = postcodeAreaPattern.matcher(dwelling.getPostcode());
-                if (matcher.matches()) {
-                    postcodeAreas.add(matcher.group(1));
-                }
-            }
         }
-        processPostcodeAreas();
-    }
-
-    private void processPostcodeAreas() {
-        LOG.debug("Postcodes: {}", postcodeAreas.size());
-        for (String postcodeArea : postcodeAreas) {
-            loadPostcodeFile(String.format("%s/%s.csv", postcodesFolder, postcodeArea.toLowerCase()));
-        }
-    }
-
-    private void loadPostcodeFile(String file) {
-        List<Postcode> postcodes = new ArrayList<Postcode>();
-        for (String line : new FileLineIterable(file)) {
-            Matcher matcher = postcodeDataPattern.matcher(line);
-            if (!matcher.find()) {
-                throw new IllegalStateException(String.format("Invalid postcode data in file: %s", file));
-            }
-            String postcode = String.format("%s %s", matcher.group(1), matcher.group(2));
-            int accuracy = Integer.parseInt(matcher.group(3));
-            int xCoordinate = Integer.parseInt(matcher.group(4));
-            int yCoordinate = Integer.parseInt(matcher.group(5));
-            postcodes.add(new Postcode(postcode, accuracy, xCoordinate, yCoordinate));
-        }
-        databaseSession.upload(postcodes);
     }
 
     public List<Dwelling> processDwellings(Iterable<String> lines) {
@@ -141,19 +117,33 @@ public class VOAUploader {
     }
 
     private void processGroup(Duple<String, List<Dwelling>> group) {
-        String postcode = group.getFirst();
+        Postcode postcode = postcodeLoader.getPostcode(group.getFirst());
         List<Dwelling> dwellings = group.getSecond();
-        List<DeliveryPointAddress> addresses = dwellingLoader.getAddresses(postcode);
-        LOG.debug("Postcode: {} {}", postcode, dwellings.size());
-        Map<Dwelling, DeliveryPointAddress> matchedDwellingAddresses = equivalence.match(dwellings, addresses);
+        matchDwellings(postcode, dwellings);
+        LOG.debug("Postcode: {} {}", postcode.getPostcode(), dwellings.size());
         for (Dwelling dwelling : dwellings) {
-            DeliveryPointAddress dwellingAddress = matchedDwellingAddresses.get(dwelling);
-            if (dwellingAddress != null) {
-                dwelling.setUprn(dwellingAddress.getUprn());
-            }
-            this.dwellings.add(dwelling);
+            processDwelling(dwelling);
         }
     }
+
+    private void processDwelling(Dwelling dwelling) {
+        DeliveryPointAddress dwellingAddress = matchedDwellingAddresses.get(dwelling);
+        if (dwellingAddress != null) {
+            dwelling.setUprn(dwellingAddress.getUprn());
+        }
+        this.dwellings.add(dwelling);
+    }
+
+    private void matchDwellings(Postcode postcode, List<Dwelling> dwellings) {
+        if (postcode == null) {
+            matchedDwellingAddresses = new HashMap<Dwelling, DeliveryPointAddress>();
+        }
+        else {
+            List<DeliveryPointAddress> addresses = dwellingLoader.getAddresses(postcode);
+            matchedDwellingAddresses = equivalence.match(dwellings, addresses);
+        }
+    }
+
 
     private List<Duple<String, List<Dwelling>>> getGroupedByPostcode(Iterable<String> lines) {
         Map<String, List<Dwelling>> map = new NeverEmptyHashMap<String, List<Dwelling>>() {
@@ -163,30 +153,32 @@ public class VOAUploader {
             }
         };
         for (String line : lines) {
-            Matcher matcher = postcodeFinderPattern.matcher(line);
-            if (matcher.find()) {
-                Dwelling dwelling = parseDwelling(matcher, line);
-                if (dwelling != null) {
-                    map.get(dwelling.getPostcode()).add(dwelling);
-                }
+            String postcode = postcodeLoader.extractPostcode(line);
+            if (postcode == null) {
+                continue;
+            }
+            Dwelling dwelling = parseDwelling(postcode, line);
+            if (dwelling != null) {
+                map.get(dwelling.getPostcode()).add(dwelling);
             }
         }
         List<Duple<String, List<Dwelling>>> list =
                 new ArrayList<Duple<String, List<Dwelling>>>(map.size());
         for (Map.Entry<String, List<Dwelling>> entry : map.entrySet()) {
-            list.add(new Duple<String, List<Dwelling>>(entry.getKey(), entry.getValue()));
+            String postcode = entry.getKey();
+            postcodeLoader.loadPostcode(postcode);
+            list.add(new Duple<String, List<Dwelling>>(postcode, entry.getValue()));
         }
         return list;
     }
 
-    private Dwelling parseDwelling(Matcher matcher, String line) {
+    private Dwelling parseDwelling(String postcode, String line) {
         String[] split = line.split("~");
         String councilTaxBand = split[1];
         if (councilTaxBand.length() > 1) {
             return null;
         }
-        String address = line.substring(0, matcher.start(1)).replaceAll("[ ,]*$", "");
-        String postcode = matcher.group(1);
+        String address = line.substring(0, line.indexOf(postcode)).replaceAll("[ ,]*$", "");
         String larn = split[3];
         return new Dwelling(address, postcode, councilTaxBand.charAt(0), larn, null, null);
     }
