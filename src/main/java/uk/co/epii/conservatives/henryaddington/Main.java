@@ -7,6 +7,7 @@ import org.springframework.context.support.ClassPathXmlApplicationContext;
 import uk.co.epii.conservatives.henryaddington.hibernate.HibernateBuilder;
 import uk.co.epii.conservatives.henryaddington.voa.VOADownloader;
 import uk.co.epii.conservatives.henryaddington.voa.VOAMerger;
+import uk.co.epii.conservatives.henryaddington.voa.VOAUploader;
 
 import java.io.File;
 import java.io.FilenameFilter;
@@ -97,6 +98,9 @@ public class Main {
         }
         HibernateBuilder hibernateBuilder = (HibernateBuilder)context.getBean("hibernateBuilder");
         hibernateBuilder.process();
+        VOAUploader voaUploader = (VOAUploader)context.getBean("voaUploader");
+        LOG.info("Loading dwellings");
+        voaUploader.processDwellings();
     }
 
     private static void describedImageSplit(String[] args) {

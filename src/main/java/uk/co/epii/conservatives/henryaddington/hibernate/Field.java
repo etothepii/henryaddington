@@ -16,16 +16,18 @@ public class Field {
     private final String javaType;
     private final String hibernateType;
     private final String javaName;
+    private Integer length;
     private final boolean primaryKey;
     private final boolean nullable;
 
-    Field(String name, String javaType, String hibernateType, boolean primaryKey, boolean nullable) {
+    Field(String name, String javaType, String hibernateType, boolean primaryKey, boolean nullable, Integer length) {
         this.dbName = name;
         this.javaType = javaType;
         this.hibernateType = hibernateType;
         this.javaName = createJavaName(name);
         this.primaryKey = primaryKey;
         this.nullable = nullable;
+        this.length = length;
     }
 
     private String createJavaName(String name) {
@@ -50,11 +52,13 @@ public class Field {
     }
 
     private static Pattern fieldPattern = Pattern.compile(" *([^ ]*) *([^ \\(\\)]*)[ \\(\\)].*");
+    private static Pattern lengthPattern = Pattern.compile("\\( *([0-9]*) *\\)");
+
     private static Map<String, String> javaTypeMap = new HashMap<String, String>();
     static {
         javaTypeMap.put("INT", "int");
         javaTypeMap.put("VARCHAR", "String");
-        javaTypeMap.put("CHAR", "String");
+        javaTypeMap.put("CHAR", "char");
         javaTypeMap.put("TINYTEXT", "String");
         javaTypeMap.put("BIGINT", "long");
         javaTypeMap.put("FLOAT", "float");
@@ -65,7 +69,7 @@ public class Field {
     static {
         javaNullTypeMap.put("INT", "Integer");
         javaNullTypeMap.put("VARCHAR", "String");
-        javaNullTypeMap.put("CHAR", "String");
+        javaNullTypeMap.put("CHAR", "Character");
         javaNullTypeMap.put("TINYTEXT", "String");
         javaNullTypeMap.put("BIGINT", "Long");
         javaNullTypeMap.put("FLOAT", "Float");
@@ -84,15 +88,21 @@ public class Field {
     }
 
     public static Field parse(String in) {
-        Matcher matcher = fieldPattern.matcher(in);
-        matcher.find();
+        Matcher fieldMatcher = fieldPattern.matcher(in);
+        fieldMatcher.find();
         boolean nullable = !in.contains("NOT NULL");
-        return new Field(matcher.group(1),
+        Matcher lengthMatcher = lengthPattern.matcher(in);
+        Integer length = lengthMatcher.find() ? Integer.parseInt(lengthMatcher.group(1)) : null;
+        String key = fieldMatcher.group(2).toUpperCase();
+        if (key.equals("CHAR") && length > 1) {
+            key = "VARCHAR";
+        }
+        return new Field(fieldMatcher.group(1),
                 nullable ?
-                        javaNullTypeMap.get(matcher.group(2).toUpperCase()) :
-                        javaTypeMap.get(matcher.group(2).toUpperCase()),
-                hibernateTypeMap.get(matcher.group(2).toUpperCase()),
-                in.contains("PRIMARY KEY"), nullable);
+                        javaNullTypeMap.get(key) :
+                        javaTypeMap.get(key),
+                hibernateTypeMap.get(key),
+                in.contains("PRIMARY KEY"), nullable, length);
     }
 
     public String getDbName() {

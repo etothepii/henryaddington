@@ -68,7 +68,7 @@ public class HibernatePrinter {
                 if (field.isPrimaryKey()) {
                     printWriter.println(String.format("        <id name=\"%s\" type=\"%s\" column=\"%s\">",
                             field.getJavaName(false), field.getHibernateType(), field.getDbName()));
-                    printWriter.println("            <generator class=\"native\"/>");
+                    printWriter.println("            <generator class=\"assigned\"/>");
                     printWriter.println("        </id>");
                 }
                 else {
