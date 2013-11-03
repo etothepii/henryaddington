@@ -2,6 +2,8 @@ package uk.co.epii.conservatives.henryaddington.voa;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import uk.co.epii.conservatives.williamcavendishbentinck.stubs.StubDeliveryPointAddress;
+import uk.co.epii.conservatives.williamcavendishbentinck.stubs.StubDwelling;
 import uk.co.epii.conservatives.williamcavendishbentinck.tables.DeliveryPointAddress;
 import uk.co.epii.conservatives.williamcavendishbentinck.tables.Dwelling;
 import uk.co.epii.spencerperceval.util.Equivalence;

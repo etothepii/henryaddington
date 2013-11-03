@@ -7,6 +7,7 @@ import uk.co.epii.conservatives.williamcavendishbentinck.tables.DeliveryPointAdd
 import uk.co.epii.conservatives.williamcavendishbentinck.tables.Postcode;
 import uk.co.epii.spencerperceval.tuple.Duple;
 
+import java.awt.*;
 import java.awt.geom.Point2D;
 import java.util.ArrayList;
 import java.util.List;
@@ -33,20 +34,34 @@ public class DwellingLoaderImpl implements DwellingLoader {
 
     @Override
     public List<DeliveryPointAddress> getAddresses(Postcode postcode) {
-        List<Duple<BLPU, DeliveryPointAddress>> dwellings = databaseSession.getHouses(postcode.getPostcode());
+        List<Duple<DeliveryPointAddress, BLPU>> dwellings = databaseSession.fromPostcode(postcode.getPostcode(),
+                DeliveryPointAddress.class, BLPU.class, "UPRN", "UPRN");
         List<DeliveryPointAddress> addresses = new ArrayList<DeliveryPointAddress>(dwellings.size());
-        for (Duple<BLPU, DeliveryPointAddress> blpuAddress : dwellings) {
-            addresses.add(blpuAddress.getSecond());
+        for (Duple<DeliveryPointAddress, BLPU> blpuAddress : dwellings) {
+            addresses.add(blpuAddress.getFirst());
         }
         return addresses;
     }
 
     @Override
     public List<DeliveryPointAddress> getAddresses(Point2D.Float location, float radius) {
-        List<Duple<BLPU, DeliveryPointAddress>> dwellings = databaseSession.getHouses(location, radius);
+        List<Duple<BLPU, DeliveryPointAddress>> dwellings = databaseSession.containedWithin(
+                new Rectangle(
+                        (int)Math.floor(location.getX() - radius),
+                        (int)Math.floor(location.getY() - radius),
+                        (int)Math.ceil(radius * 2),
+                        (int)Math.ceil(radius * 2)),
+                BLPU.class, DeliveryPointAddress.class, "UPRN", "UPRN");
         List<DeliveryPointAddress> addresses = new ArrayList<DeliveryPointAddress>(dwellings.size());
         for (Duple<BLPU, DeliveryPointAddress> blpuAddress : dwellings) {
-            addresses.add(blpuAddress.getSecond());
+            BLPU blpu = blpuAddress.getFirst();
+            if (blpu == null) {
+                continue;
+            }
+            if (Math.pow(blpu.getXCoordinate() - location.getX(), 2) +
+                    Math.pow(blpu.getYCoordinate() - location.getY(), 2) <= Math.pow(radius, 2)) {
+                addresses.add(blpuAddress.getSecond());
+            }
         }
         return addresses;
     }
