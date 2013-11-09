@@ -56,7 +56,11 @@
         <property name="resultsTableTitle" value="Search results"/>
     </bean>
 
-    <bean id="databaseSession" class="uk.co.epii.conservatives.williamcavendishbentinck.DatabaseSessionImpl"/>
+    <bean id="databaseSession" class="uk.co.epii.conservatives.williamcavendishbentinck.DatabaseSessionImpl" init-method="init">
+        <property name="connection" value="jdbc:mysql://localhost/frederickNorth"/>
+        <property name="username" value="frederickNorth"/>
+        <property name="password" value="frederickNorth1"/>
+    </bean>
 
     <bean id="dwellingLoader" class="uk.co.epii.conservatives.henryaddington.voa.DwellingLoaderImpl">
         <property name="databaseSession" ref="databaseSession"/>
