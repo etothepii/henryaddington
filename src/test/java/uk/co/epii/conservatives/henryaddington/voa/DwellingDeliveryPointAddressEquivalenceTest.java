@@ -6,16 +6,11 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
-import uk.co.epii.conservatives.henryaddington.DatabaseUploader;
 import uk.co.epii.conservatives.williamcavendishbentinck.DatabaseSession;
 import uk.co.epii.conservatives.williamcavendishbentinck.DatabaseSessionImpl;
-import uk.co.epii.conservatives.williamcavendishbentinck.tables.BLPU;
 import uk.co.epii.conservatives.williamcavendishbentinck.tables.DeliveryPointAddress;
 import uk.co.epii.conservatives.williamcavendishbentinck.tables.Dwelling;
-import uk.co.epii.spencerperceval.tuple.Duple;
 
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.*;
 
 import static junit.framework.Assert.*;
@@ -28,11 +23,13 @@ import static junit.framework.Assert.*;
 public class DwellingDeliveryPointAddressEquivalenceTest {
 
     private static DwellingDeliveryPointAddressEquivalence instance;
+    private static DatabaseSession databaseSession;
 
     @BeforeClass
     public static void beforeClass() {
         ApplicationContext context = new ClassPathXmlApplicationContext("applicationContext.xml");
         instance = (DwellingDeliveryPointAddressEquivalence)context.getBean("dwellingDeliveryPointAddressEquivalence");
+        databaseSession = (DatabaseSession)context.getBean("databaseSession");
     }
 
     @Test
@@ -282,7 +279,6 @@ public class DwellingDeliveryPointAddressEquivalenceTest {
 
     @Test
     public void testPostcode() {
-        DatabaseSession databaseSession = new DatabaseSessionImpl();
         Session session = databaseSession.getSessionFactory().openSession();
         String postcode = "E1 4PE";
         String addressSql = "SELECT * FROM DeliveryPointAddress WHERE POSTCODE = :postcode";
