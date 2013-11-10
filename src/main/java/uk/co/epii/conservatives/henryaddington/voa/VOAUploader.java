@@ -120,7 +120,7 @@ public class VOAUploader {
         Postcode postcode = postcodeLoader.getPostcode(group.getFirst());
         List<Dwelling> dwellings = group.getSecond();
         matchDwellings(postcode, dwellings);
-        LOG.debug("Postcode: {} {}", postcode.getPostcode(), dwellings.size());
+        LOG.debug("Postcode: {} {}", group.getFirst(), dwellings.size());
         for (Dwelling dwelling : dwellings) {
             processDwelling(dwelling);
         }
