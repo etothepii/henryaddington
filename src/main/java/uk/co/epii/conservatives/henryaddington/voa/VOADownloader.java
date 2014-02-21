@@ -54,6 +54,7 @@ public class VOADownloader {
     private String[] previousPage;
     private int[] previousRange;
     private int[] range;
+    private List<CouncilAndBand> failures = new ArrayList<CouncilAndBand>();
 
     public HtmlPage getPage(String uri) {
         try {
@@ -137,17 +138,39 @@ public class VOADownloader {
         for (String council : localAuthorityCodes.keySet()) {
             download(council);
         }
+        repeatFailures();
     }
 
-    public void download(String council) {
+    private void download(String council) {
         initiateWriters(council, null);
         try {
-            for (String band : bands) {
-                process(council, band);
+            try {
+                for (String band : bands) {
+                        process(council, band);
+                }
+            }
+            catch (Exception e) {
+                LOG.warn("FAILED TO DOWNLOAD: {}", council);
+                failures.add(new CouncilAndBand(council, null));
             }
         }
         finally {
             closeWriters();
+        }
+    }
+
+    private void repeatFailures() {
+        while (!failures.isEmpty()) {
+            List<CouncilAndBand> retry = failures;
+            failures = new ArrayList<CouncilAndBand>();
+            for (CouncilAndBand councilAndBand : retry) {
+                if (councilAndBand == null) {
+                    download(councilAndBand.council);
+                }
+                else {
+                    process(councilAndBand.council, councilAndBand.band);
+                }
+            }
         }
     }
 
@@ -162,6 +185,7 @@ public class VOADownloader {
     }
 
     private void process(String council, String band) {
+
         this.council = council;
         this.band = band;
         selectTargetCouncilAndBand(council, band);
@@ -382,5 +406,15 @@ public class VOADownloader {
 
     public void setResultsTableTitle(String resultsTableTitle) {
         this.resultsTableTitle = resultsTableTitle;
+    }
+
+    private class CouncilAndBand {
+        public final String council;
+        public final String band;
+
+        public CouncilAndBand(String council, String band) {
+            this.council = council;
+            this.band = band;
+        }
     }
 }
