@@ -1,5 +1,7 @@
 package uk.co.epii.conservatives.henryaddington.hibernate;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import sun.misc.Regexp;
 
 import java.io.*;
@@ -14,6 +16,8 @@ import java.util.regex.Pattern;
  * Time: 22:06
  */
 public class HibernateBuilder {
+
+    private static final Logger LOG = LoggerFactory.getLogger(HibernateBuilder.class);
 
     private String resource;
     private HibernatePrinter hibernatePrinter;
@@ -38,20 +42,26 @@ public class HibernateBuilder {
         try {
             inputStreamReader = new InputStreamReader(HibernateBuilder.class.getResourceAsStream(resource));
             bufferedReader = new BufferedReader(inputStreamReader);
-            String in;
-            Table activeTable = null;
-            while ((in = bufferedReader.readLine()) != null) {
-                if (in.contains("CREATE TABLE")) {
-                    Matcher matcher = createTablePattern.matcher(in);
-                    matcher.find();
-                    activeTable = new Table(matcher.group(1));
-                    tables.add(activeTable);
+            String in = null;
+            try {
+                Table activeTable = null;
+                while ((in = bufferedReader.readLine()) != null) {
+                    if (in.contains("CREATE TABLE")) {
+                        Matcher matcher = createTablePattern.matcher(in);
+                        matcher.find();
+                        activeTable = new Table(matcher.group(1));
+                        tables.add(activeTable);
+                        }
+                    else if (!in.trim().startsWith("INDEX") && in.endsWith(",") || in.endsWith(")")) {
+                        activeTable.fields.add(Field.parse(in));
+                    }
                 }
-                else if (!in.trim().startsWith("INDEX") && in.endsWith(",") || in.endsWith(")")) {
-                    activeTable.fields.add(Field.parse(in));
-                }
+                return tables;
             }
-            return tables;
+            catch (RuntimeException e) {
+                LOG.debug(in);
+                throw e;
+            }
         }
         catch (IOException ioe) {
             throw new RuntimeException(ioe);

@@ -15,6 +15,7 @@
             <map>
                 <entry key="28" value="DeliveryPointAddress"/>
                 <entry key="21" value="BLPU"/>
+                <entry key="32" value="Classification"/>
             </map>
         </property>
         <property name="files">
@@ -66,9 +67,6 @@
         <property name="databaseSession" ref="databaseSession"/>
     </bean>
 
-    <bean id="dwellingDeliveryPointAddressEquivalence"
-          class="uk.co.epii.conservatives.henryaddington.voa.DwellingDeliveryPointAddressEquivalence" />
-
     <bean id="postcodeMatcher" class="uk.co.epii.spencerperceval.data.PostcodeMatcher" init-method="init" />
 
     <bean id="postcodeLoader" class="uk.co.epii.conservatives.henryaddington.voa.PostcodeLoaderImpl">
@@ -81,7 +79,6 @@
         <property name="dwellingsFolder" value= "~/frederickNorth/Data/dwellings" />
         <property name="dwellingLoader" ref="dwellingLoader" />
         <property name="databaseSession" ref="databaseSession" />
-        <property name="equivalence" ref="dwellingDeliveryPointAddressEquivalence"/>
         <property name="searchRadius" value="100"/>
         <property name="postcodeLoader" ref="postcodeLoader"/>
     </bean>
