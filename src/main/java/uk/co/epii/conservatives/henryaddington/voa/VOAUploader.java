@@ -169,7 +169,7 @@ public class VOAUploader {
     }
 
     private void matchDwellings(Postcode postcode, List<Dwelling> dwellings) {
-        if (postcode == null) {
+        if (postcode == null || equivalence == null) {
             matchedDwellingAddresses = new HashMap<Dwelling, DeliveryPointAddress>();
         }
         else {
