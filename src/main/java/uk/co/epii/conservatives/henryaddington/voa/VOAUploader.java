@@ -2,10 +2,10 @@ package uk.co.epii.conservatives.henryaddington.voa;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import uk.co.epii.conservatives.williamcavendishbentinck.DatabaseSession;
-import uk.co.epii.conservatives.williamcavendishbentinck.tables.DeliveryPointAddress;
-import uk.co.epii.conservatives.williamcavendishbentinck.tables.Dwelling;
-import uk.co.epii.conservatives.williamcavendishbentinck.tables.Postcode;
+import uk.co.epii.politics.williamcavendishbentinck.DatabaseSession;
+import uk.co.epii.politics.williamcavendishbentinck.tables.DeliveryPointAddress;
+import uk.co.epii.politics.williamcavendishbentinck.tables.Dwelling;
+import uk.co.epii.politics.williamcavendishbentinck.tables.Postcode;
 import uk.co.epii.spencerperceval.FileLineIterable;
 import uk.co.epii.spencerperceval.data.PostcodeMatcher;
 import uk.co.epii.spencerperceval.tuple.Duple;
@@ -22,6 +22,8 @@ import java.util.*;
  * Time: 11:26
  */
 public class VOAUploader {
+
+    private static final int MAX_LENGTH = 30;
 
     private static final Logger LOG = LoggerFactory.getLogger(VOAUploader.class);
 
@@ -47,7 +49,7 @@ public class VOAUploader {
     private PostcodeLoader postcodeLoader;
     private Map<Dwelling, DeliveryPointAddress> matchedDwellingAddresses;
 
-    public float getSearchRadius() {
+  public float getSearchRadius() {
         return searchRadius;
     }
 
@@ -100,14 +102,46 @@ public class VOAUploader {
         this.equivalence = equivalence;
     }
 
-    public void processDwellings() {
-        for (File file : new File(dwellingsFolder).listFiles()) {
-            List<Dwelling> dwellings = processDwellings(new FileLineIterable(file));
-            databaseSession.upload(dwellings);
-        }
+  public void processDwellings() {
+    for (File file : new File(dwellingsFolder).listFiles()) {
+      String prefix = getPrefix();
+      Collection<Dwelling> dwellings = processDwellings(new FileLineIterable(file));
+      dwellings = removeDuplicatesAndPrependPrefix(prefix, dwellings);
+      databaseSession.upload(dwellings);
     }
+  }
 
-    public List<Dwelling> processDwellings(Iterable<String> lines) {
+  private Collection<Dwelling> removeDuplicatesAndPrependPrefix(String prefix, Collection<Dwelling> dwellings) {
+    Map<String, Dwelling> unique = new HashMap<String, Dwelling>();
+    int maxLength = MAX_LENGTH;
+    for (Dwelling dwelling : dwellings) {
+      dwelling.setLarn(prefix + dwelling.getLarn());
+      Dwelling duplicate = unique.get(dwelling.getLarn());
+      if (duplicate == null) {
+        unique.put(dwelling.getLarn(), dwelling);
+        continue;
+      }
+      if (dwelling.getLarn().length() > maxLength) {
+        maxLength = dwelling.getLarn().length();
+      }
+      if (dwelling.getVoaAddress().equals(duplicate.getVoaAddress()) &&
+              dwelling.getPostcode().equals(duplicate.getPostcode())) {
+        if (dwelling.getCouncilTaxBand() == duplicate.getCouncilTaxBand()) {
+          continue;
+        }
+        duplicate.setCouncilTaxBand((char)Math.max(duplicate.getCouncilTaxBand(), dwelling.getCouncilTaxBand()));
+      }
+      LOG.warn(String.format("Non Equal Dwellings with the same LARN: \n%s %s %s\n%s %s %s",
+              dwelling.getVoaAddress(), dwelling.getPostcode(), dwelling.getCouncilTaxBand() + "",
+              duplicate.getVoaAddress(), duplicate.getPostcode(), duplicate.getCouncilTaxBand() + ""));
+    }
+    if (maxLength > MAX_LENGTH) {
+      throw new RuntimeException("Larns found as long as: " + maxLength);
+    }
+    return unique.values();
+  }
+
+  public List<Dwelling> processDwellings(Iterable<String> lines) {
         List<Duple<String, List<Dwelling>>> groups = getGroupedByPostcode(lines);
         dwellings = new ArrayList<Dwelling>();
         for (Duple<String, List<Dwelling>> group : groups) {
@@ -180,6 +214,19 @@ public class VOAUploader {
         }
         String address = line.substring(0, line.indexOf(postcode)).replaceAll("[ ,]*$", "");
         String larn = split[3];
-        return new Dwelling(address, postcode, councilTaxBand.charAt(0), larn, null, null);
+        return new Dwelling(address, postcode, councilTaxBand.charAt(0), larn, null, null, null, null);
     }
+
+  private static int counter = 0;
+
+  public static synchronized int getAuthorityCount() {
+    return counter++;
+  }
+
+  public String getPrefix() {
+    int authority = getAuthorityCount();
+    char a = (char)(authority / 26 + 65);
+    char b = (char)(authority % 26 + 65);
+    return a + "" + b + "_";
+  }
 }

@@ -1,8 +1,7 @@
 package uk.co.epii.conservatives.henryaddington.voa;
 
-import uk.co.epii.conservatives.williamcavendishbentinck.tables.DeliveryPointAddress;
-import uk.co.epii.conservatives.williamcavendishbentinck.tables.Postcode;
-import uk.co.epii.spencerperceval.tuple.Duple;
+import uk.co.epii.politics.williamcavendishbentinck.tables.DeliveryPointAddress;
+import uk.co.epii.politics.williamcavendishbentinck.tables.Postcode;
 import uk.co.epii.spencerperceval.util.NeverEmptyHashMap;
 
 import java.awt.geom.Point2D;

@@ -28,10 +28,10 @@
 
     <bean id="hibernatePrinter" class="uk.co.epii.conservatives.henryaddington.hibernate.HibernatePrinter">
         <property name="javaDirectory"
-                  value="~/git/conservatives/williamCavendishBentinck/src/main/java/uk/co/epii/conservatives/williamCavendishBentinck/tables"/>
+                  value="~/git/politics/williamCavendishBentinck/src/main/java/uk/co/epii/politics/williamCavendishBentinck/tables"/>
         <property name="hibernateDirectory"
-                  value="~/git/conservatives/williamCavendishBentinck/src/main/resources/tables"/>
-        <property name="javaPackage" value="uk.co.epii.conservatives.williamcavendishbentinck.tables" />
+                  value="~/git/politics/williamCavendishBentinck/src/main/resources/tables"/>
+        <property name="javaPackage" value="uk.co.epii.politics.williamcavendishbentinck.tables" />
         <property name="javaImports">
             <list>
                 <value>java.sql.Date</value>
@@ -56,7 +56,7 @@
         <property name="resultsTableTitle" value="Search results"/>
     </bean>
 
-    <bean id="databaseSession" class="uk.co.epii.conservatives.williamcavendishbentinck.DatabaseSessionImpl" init-method="init">
+    <bean id="databaseSession" class="uk.co.epii.politics.williamcavendishbentinck.DatabaseSessionImpl" init-method="init">
         <property name="connection" value="jdbc:mysql://localhost/frederickNorth"/>
         <property name="username" value="frederickNorth"/>
         <property name="password" value="frederickNorth1"/>

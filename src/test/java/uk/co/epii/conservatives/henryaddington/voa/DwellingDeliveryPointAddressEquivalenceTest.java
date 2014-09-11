@@ -6,10 +6,9 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
-import uk.co.epii.conservatives.williamcavendishbentinck.DatabaseSession;
-import uk.co.epii.conservatives.williamcavendishbentinck.DatabaseSessionImpl;
-import uk.co.epii.conservatives.williamcavendishbentinck.tables.DeliveryPointAddress;
-import uk.co.epii.conservatives.williamcavendishbentinck.tables.Dwelling;
+import uk.co.epii.politics.williamcavendishbentinck.DatabaseSession;
+import uk.co.epii.politics.williamcavendishbentinck.tables.DeliveryPointAddress;
+import uk.co.epii.politics.williamcavendishbentinck.tables.Dwelling;
 
 import java.util.*;
 
@@ -35,12 +34,12 @@ public class DwellingDeliveryPointAddressEquivalenceTest {
     @Test
     public void matchesAbbotAndAbbottTest() {
         List<Dwelling> dwellings = Arrays.asList(new Dwelling[] {
-                new Dwelling("1, ABBOTT HOUSE, SMYTHE STREET, LONDON", "E14 0HD", 'C', "100400102", null, null),
-                new Dwelling("2, ABBOTT HOUSE, SMYTHE STREET, LONDON", "E14 0HD", 'C', "100400209", null, null),
-                new Dwelling("3, ABBOTT HOUSE, SMYTHE STREET, LONDON", "E14 0HD", 'C', "100400306", null, null),
-                new Dwelling("4, ABBOTT HOUSE, SMYTHE STREET, LONDON", "E14 0HD", 'C', "100400403", null, null),
-                new Dwelling("5, ABBOTT HOUSE, SMYTHE STREET, LONDON", "E14 0HD", 'C', "100400500", null, null),
-                new Dwelling("10, ABBOTT HOUSE, SMYTHE STREET, LONDON", "E14 0HD", 'C', "100401004", null, null),
+                new Dwelling("1, ABBOTT HOUSE, SMYTHE STREET, LONDON", "E14 0HD", 'C', "100400102", null, null, null, null),
+                new Dwelling("2, ABBOTT HOUSE, SMYTHE STREET, LONDON", "E14 0HD", 'C', "100400209", null, null, null, null),
+                new Dwelling("3, ABBOTT HOUSE, SMYTHE STREET, LONDON", "E14 0HD", 'C', "100400306", null, null, null, null),
+                new Dwelling("4, ABBOTT HOUSE, SMYTHE STREET, LONDON", "E14 0HD", 'C', "100400403", null, null, null, null),
+                new Dwelling("5, ABBOTT HOUSE, SMYTHE STREET, LONDON", "E14 0HD", 'C', "100400500", null, null, null, null),
+                new Dwelling("10, ABBOTT HOUSE, SMYTHE STREET, LONDON", "E14 0HD", 'C', "100401004", null, null, null, null),
         });
         List<DeliveryPointAddress> addresses = Arrays.asList(new DeliveryPointAddress[]{
                 new DeliveryPointAddress(0, null, 0, 6064892, null, 0, null, null,
@@ -79,11 +78,11 @@ public class DwellingDeliveryPointAddressEquivalenceTest {
     @Test
     public void matchesAbbottRoadTest() {
         List<Dwelling> dwellings = Arrays.asList(new Dwelling[] {
-                new Dwelling("59, ABBOTT ROAD, LONDON", "E14 0GP", 'E', "100802159", null, null),
-                new Dwelling("55, ABBOTT ROAD, LONDON", "E14 0GP", 'D', "100802155", null, null),
-                new Dwelling("53, ABBOTT ROAD, LONDON", "E14 0GP", 'D', "100802153", null, null),
-                new Dwelling("51, ABBOTT ROAD, LONDON", "E14 0GP", 'D', "100802151", null, null),
-                new Dwelling("49, ABBOTT ROAD, LONDON", "E14 0GP", 'E', "100802149", null, null),
+                new Dwelling("59, ABBOTT ROAD, LONDON", "E14 0GP", 'E', "100802159", null, null, null, null),
+                new Dwelling("55, ABBOTT ROAD, LONDON", "E14 0GP", 'D', "100802155", null, null, null, null),
+                new Dwelling("53, ABBOTT ROAD, LONDON", "E14 0GP", 'D', "100802153", null, null, null, null),
+                new Dwelling("51, ABBOTT ROAD, LONDON", "E14 0GP", 'D', "100802151", null, null, null, null),
+                new Dwelling("49, ABBOTT ROAD, LONDON", "E14 0GP", 'E', "100802149", null, null, null, null),
         });
         List<DeliveryPointAddress> addresses = Arrays.asList(new DeliveryPointAddress[]{
                 new DeliveryPointAddress(0, null, 0, 6133071, null, 0, null, null,
@@ -118,11 +117,11 @@ public class DwellingDeliveryPointAddressEquivalenceTest {
     @Test
     public void matchesAnExtraDwellingTest() {
         List<Dwelling> dwellings = Arrays.asList(new Dwelling[] {
-                new Dwelling("59, ABBOTT ROAD, LONDON", "E14 0GP", 'E', "100802159", null, null),
-                new Dwelling("55, ABBOTT ROAD, LONDON", "E14 0GP", 'D', "100802155", null, null),
-                new Dwelling("53, ABBOTT ROAD, LONDON", "E14 0GP", 'D', "100802153", null, null),
-                new Dwelling("51, ABBOTT ROAD, LONDON", "E14 0GP", 'D', "100802151", null, null),
-                new Dwelling("49, ABBOTT ROAD, LONDON", "E14 0GP", 'E', "100802149", null, null),
+                new Dwelling("59, ABBOTT ROAD, LONDON", "E14 0GP", 'E', "100802159", null, null, null, null),
+                new Dwelling("55, ABBOTT ROAD, LONDON", "E14 0GP", 'D', "100802155", null, null, null, null),
+                new Dwelling("53, ABBOTT ROAD, LONDON", "E14 0GP", 'D', "100802153", null, null, null, null),
+                new Dwelling("51, ABBOTT ROAD, LONDON", "E14 0GP", 'D', "100802151", null, null, null, null),
+                new Dwelling("49, ABBOTT ROAD, LONDON", "E14 0GP", 'E', "100802149", null, null, null, null),
         });
         List<DeliveryPointAddress> addresses = Arrays.asList(new DeliveryPointAddress[]{
                 new DeliveryPointAddress(0, null, 0, 6133071, null, 0, null, null,
@@ -152,9 +151,9 @@ public class DwellingDeliveryPointAddressEquivalenceTest {
     @Test
     public void matchesAnExtraAddressTest() {
         List<Dwelling> dwellings = Arrays.asList(new Dwelling[] {
-                new Dwelling("53, ABBOTT ROAD, LONDON", "E14 0GP", 'D', "100802153", null, null),
-                new Dwelling("51, ABBOTT ROAD, LONDON", "E14 0GP", 'D', "100802151", null, null),
-                new Dwelling("49, ABBOTT ROAD, LONDON", "E14 0GP", 'E', "100802149", null, null),
+                new Dwelling("53, ABBOTT ROAD, LONDON", "E14 0GP", 'D', "100802153", null, null, null, null),
+                new Dwelling("51, ABBOTT ROAD, LONDON", "E14 0GP", 'D', "100802151", null, null, null, null),
+                new Dwelling("49, ABBOTT ROAD, LONDON", "E14 0GP", 'E', "100802149", null, null, null, null),
         });
         List<DeliveryPointAddress> addresses = Arrays.asList(new DeliveryPointAddress[]{
                 new DeliveryPointAddress(0, null, 0, 6133071, null, 0, null, null,
@@ -184,7 +183,7 @@ public class DwellingDeliveryPointAddressEquivalenceTest {
     @Test
     public void matchesSingleTest() {
         List<Dwelling> dwellings = Arrays.asList(new Dwelling[] {
-                new Dwelling("1, ABBOTT HOUSE, SMYTHE STREET, LONDON", "E14 0HD", 'C', "100400102", null, null)
+                new Dwelling("1, ABBOTT HOUSE, SMYTHE STREET, LONDON", "E14 0HD", 'C', "100400102", null, null, null, null)
         });
         List<DeliveryPointAddress> addresses = Arrays.asList(new DeliveryPointAddress[]{
                 new DeliveryPointAddress(0, null, 0, 6064892, null, 0, null, null,
@@ -203,13 +202,13 @@ public class DwellingDeliveryPointAddressEquivalenceTest {
     @Test
     public void matchesWithRandomUnitTest() {
         List<Dwelling> dwellings = Arrays.asList(new Dwelling[] {
-                new Dwelling("1, ABBOTT HOUSE, SMYTHE STREET, LONDON", "E14 0HD", 'C', "100400102", null, null),
-                new Dwelling("2, ABBOTT HOUSE, SMYTHE STREET, LONDON", "E14 0HD", 'C', "100400209", null, null),
-                new Dwelling("3, ABBOTT HOUSE, SMYTHE STREET, LONDON", "E14 0HD", 'C', "100400306", null, null),
-                new Dwelling("4, ABBOTT HOUSE, SMYTHE STREET, LONDON", "E14 0HD", 'C', "100400403", null, null),
-                new Dwelling("5, ABBOTT HOUSE, SMYTHE STREET, LONDON", "E14 0HD", 'C', "100400500", null, null),
-                new Dwelling("10, ABBOTT HOUSE, SMYTHE STREET, LONDON", "E14 0HD", 'C', "100400501", null, null),
-                new Dwelling("11, ABBOTT HOUSE, SMYTHE STREET, LONDON", "E14 0HD", 'C', "100400502", null, null),
+                new Dwelling("1, ABBOTT HOUSE, SMYTHE STREET, LONDON", "E14 0HD", 'C', "100400102", null, null, null, null),
+                new Dwelling("2, ABBOTT HOUSE, SMYTHE STREET, LONDON", "E14 0HD", 'C', "100400209", null, null, null, null),
+                new Dwelling("3, ABBOTT HOUSE, SMYTHE STREET, LONDON", "E14 0HD", 'C', "100400306", null, null, null, null),
+                new Dwelling("4, ABBOTT HOUSE, SMYTHE STREET, LONDON", "E14 0HD", 'C', "100400403", null, null, null, null),
+                new Dwelling("5, ABBOTT HOUSE, SMYTHE STREET, LONDON", "E14 0HD", 'C', "100400500", null, null, null, null),
+                new Dwelling("10, ABBOTT HOUSE, SMYTHE STREET, LONDON", "E14 0HD", 'C', "100400501", null, null, null, null),
+                new Dwelling("11, ABBOTT HOUSE, SMYTHE STREET, LONDON", "E14 0HD", 'C', "100400502", null, null, null, null),
         });
         List<DeliveryPointAddress> addresses = Arrays.asList(new DeliveryPointAddress[]{
                 new DeliveryPointAddress(0, null, 0, 6064892, null, 0, null, null,
@@ -252,12 +251,12 @@ public class DwellingDeliveryPointAddressEquivalenceTest {
     @Test
     public void matchesWithBuildingBLPU() {
         List<Dwelling> dwellings = Arrays.asList(new Dwelling[] {
-                new Dwelling("1, ABBOTT HOUSE 2, SMYTHE STREET, LONDON", "E14 0HD", 'C', "100400102", null, null),
-                new Dwelling("2, ABBOTT HOUSE 2, SMYTHE STREET, LONDON", "E14 0HD", 'C', "100400209", null, null),
-                new Dwelling("3, ABBOTT HOUSE 2, SMYTHE STREET, LONDON", "E14 0HD", 'C', "100400306", null, null),
-                new Dwelling("4, ABBOTT HOUSE 2, SMYTHE STREET, LONDON", "E14 0HD", 'C', "100400403", null, null),
-                new Dwelling("5, ABBOTT HOUSE 2, SMYTHE STREET, LONDON", "E14 0HD", 'C', "100400500", null, null),
-                new Dwelling("10, ABBOTT HOUSE 2, SMYTHE STREET, LONDON", "E14 0HD", 'C', "100400500", null, null),
+                new Dwelling("1, ABBOTT HOUSE 2, SMYTHE STREET, LONDON", "E14 0HD", 'C', "100400102", null, null, null, null),
+                new Dwelling("2, ABBOTT HOUSE 2, SMYTHE STREET, LONDON", "E14 0HD", 'C', "100400209", null, null, null, null),
+                new Dwelling("3, ABBOTT HOUSE 2, SMYTHE STREET, LONDON", "E14 0HD", 'C', "100400306", null, null, null, null),
+                new Dwelling("4, ABBOTT HOUSE 2, SMYTHE STREET, LONDON", "E14 0HD", 'C', "100400403", null, null, null, null),
+                new Dwelling("5, ABBOTT HOUSE 2, SMYTHE STREET, LONDON", "E14 0HD", 'C', "100400500", null, null, null, null),
+                new Dwelling("10, ABBOTT HOUSE 2, SMYTHE STREET, LONDON", "E14 0HD", 'C', "100400500", null, null, null, null),
         });
         List<DeliveryPointAddress> addresses = Arrays.asList(new DeliveryPointAddress[]{
                 new DeliveryPointAddress(0, null, 0, 6064892, null, 0, null, null,

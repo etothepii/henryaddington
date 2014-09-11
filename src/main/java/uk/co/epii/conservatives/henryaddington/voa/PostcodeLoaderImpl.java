@@ -1,7 +1,7 @@
 package uk.co.epii.conservatives.henryaddington.voa;
 
-import uk.co.epii.conservatives.williamcavendishbentinck.DatabaseSession;
-import uk.co.epii.conservatives.williamcavendishbentinck.tables.Postcode;
+import uk.co.epii.politics.williamcavendishbentinck.DatabaseSession;
+import uk.co.epii.politics.williamcavendishbentinck.tables.Postcode;
 import uk.co.epii.spencerperceval.FileLineIterable;
 import uk.co.epii.spencerperceval.data.PostcodeMatcher;
 

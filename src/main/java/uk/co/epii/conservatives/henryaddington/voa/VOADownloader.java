@@ -141,7 +141,7 @@ public class VOADownloader {
         repeatFailures();
     }
 
-    private void download(String council) {
+    public void download(String council) {
         initiateWriters(council, null);
         try {
             try {

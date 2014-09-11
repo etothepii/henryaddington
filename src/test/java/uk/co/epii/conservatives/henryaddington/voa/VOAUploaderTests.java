@@ -4,10 +4,9 @@ import org.junit.Before;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import uk.co.epii.conservatives.williamcavendishbentinck.tables.DeliveryPointAddress;
-import uk.co.epii.conservatives.williamcavendishbentinck.tables.Dwelling;
-import uk.co.epii.conservatives.williamcavendishbentinck.tables.Postcode;
-import uk.co.epii.spencerperceval.FileLineIterable;
+import uk.co.epii.politics.williamcavendishbentinck.tables.DeliveryPointAddress;
+import uk.co.epii.politics.williamcavendishbentinck.tables.Dwelling;
+import uk.co.epii.politics.williamcavendishbentinck.tables.Postcode;
 import uk.co.epii.spencerperceval.tuple.Duple;
 
 import java.util.*;

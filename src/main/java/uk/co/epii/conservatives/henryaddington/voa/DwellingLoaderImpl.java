@@ -1,10 +1,9 @@
 package uk.co.epii.conservatives.henryaddington.voa;
 
-import uk.co.epii.conservatives.williamcavendishbentinck.DatabaseSession;
-import uk.co.epii.conservatives.williamcavendishbentinck.extensions.DeliveryPointAddressExtensions;
-import uk.co.epii.conservatives.williamcavendishbentinck.tables.BLPU;
-import uk.co.epii.conservatives.williamcavendishbentinck.tables.DeliveryPointAddress;
-import uk.co.epii.conservatives.williamcavendishbentinck.tables.Postcode;
+import uk.co.epii.politics.williamcavendishbentinck.DatabaseSession;
+import uk.co.epii.politics.williamcavendishbentinck.tables.BLPU;
+import uk.co.epii.politics.williamcavendishbentinck.tables.DeliveryPointAddress;
+import uk.co.epii.politics.williamcavendishbentinck.tables.Postcode;
 import uk.co.epii.spencerperceval.tuple.Duple;
 
 import java.awt.*;
