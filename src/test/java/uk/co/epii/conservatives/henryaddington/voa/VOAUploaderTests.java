@@ -4,10 +4,9 @@ import org.junit.Before;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import uk.co.epii.conservatives.williamcavendishbentinck.tables.DeliveryPointAddress;
-import uk.co.epii.conservatives.williamcavendishbentinck.tables.Dwelling;
-import uk.co.epii.conservatives.williamcavendishbentinck.tables.Postcode;
-import uk.co.epii.spencerperceval.FileLineIterable;
+import uk.co.epii.politics.williamcavendishbentinck.tables.DeliveryPointAddress;
+import uk.co.epii.politics.williamcavendishbentinck.tables.Dwelling;
+import uk.co.epii.politics.williamcavendishbentinck.tables.Postcode;
 import uk.co.epii.spencerperceval.tuple.Duple;
 
 import java.util.*;
@@ -81,26 +80,6 @@ public class VOAUploaderTests {
                 11, null, "HARFORD STREET", null, null, "LONDON", "E1 4PQ", null, null, null, null, null, null, null,
                 null, null, null, null, null));
         testDwellingLoader.addAll(postcodeLoader.getPostcode("E1 4PQ"), list);
-        voaUploader.setEquivalence(new DwellingDeliveryPointAddressEquivalence());
-    }
-
-    @Test
-    public void processDwellingsTest() {
-        List<Duple<String, String>> result = new ArrayList<Duple<String, String>>();
-        for (Dwelling dwelling : voaUploader.processDwellings(dwellings)) {
-            result.add(new Duple<String, String>(dwelling.getUprn() + "", dwelling.getCouncilTaxBand() + ""));
-        }
-        List<Duple<String, String>> expected = new ArrayList<Duple<String, String>>(8);
-        expected.add(new Duple<String, String>("6167205", "D"));
-        expected.add(new Duple<String, String>("6167207", "D"));
-        expected.add(new Duple<String, String>("6167208", "D"));
-        expected.add(new Duple<String, String>("6167209", "D"));
-        expected.add(new Duple<String, String>("6085480", "C"));
-        expected.add(new Duple<String, String>("6085481", "C"));
-        expected.add(new Duple<String, String>("6085482", "C"));
-        expected.add(new Duple<String, String>("6085483", "C"));
-        expected.add(new Duple<String, String>("6048547", "B"));
-        assertCollection(expected, result);
     }
 
     public void assertCollection(Collection<?> expectedCollection, Collection<?> actualCollection) {
