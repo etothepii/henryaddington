@@ -36,6 +36,7 @@
         <property name="javaImports">
             <list>
                 <value>java.sql.Date</value>
+                <value>java.sql.Blob</value>
             </list>
         </property>
     </bean>

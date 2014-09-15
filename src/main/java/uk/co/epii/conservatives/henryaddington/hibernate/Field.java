@@ -60,9 +60,16 @@ public class Field {
         javaTypeMap.put("VARCHAR", "String");
         javaTypeMap.put("CHAR", "char");
         javaTypeMap.put("TINYTEXT", "String");
+        javaTypeMap.put("TEXT", "String");
+        javaTypeMap.put("MEDIUMTEXT", "String");
+        javaTypeMap.put("LONGTEXT", "String");
         javaTypeMap.put("BIGINT", "long");
         javaTypeMap.put("FLOAT", "float");
         javaTypeMap.put("DATE", "Date");
+        javaTypeMap.put("BLOB", "Blob");
+        javaTypeMap.put("TINYBLOB", "Blob");
+        javaTypeMap.put("MEDIUMBLOB", "Blob");
+        javaTypeMap.put("LONGBLOB", "Blob");
     }
 
     private static Map<String, String> javaNullTypeMap = new HashMap<String, String>();
@@ -71,9 +78,16 @@ public class Field {
         javaNullTypeMap.put("VARCHAR", "String");
         javaNullTypeMap.put("CHAR", "Character");
         javaNullTypeMap.put("TINYTEXT", "String");
+        javaNullTypeMap.put("TEXT", "String");
+        javaNullTypeMap.put("MEDIUMTEXT", "String");
+        javaNullTypeMap.put("LONGTEXT", "String");
         javaNullTypeMap.put("BIGINT", "Long");
         javaNullTypeMap.put("FLOAT", "Float");
         javaNullTypeMap.put("DATE", "Date");
+        javaNullTypeMap.put("BLOB", "Blob");
+        javaNullTypeMap.put("TINYBLOB", "Blob");
+        javaNullTypeMap.put("MEDIUMBLOB", "Blob");
+        javaNullTypeMap.put("LONGBLOB", "Blob");
     }
 
     private static Map<String, String> hibernateTypeMap = new HashMap<String, String>();
@@ -82,9 +96,16 @@ public class Field {
         hibernateTypeMap.put("VARCHAR", "string");
         hibernateTypeMap.put("CHAR", "character");
         hibernateTypeMap.put("TINYTEXT", "string");
+        hibernateTypeMap.put("TEXT", "string");
+        hibernateTypeMap.put("MEDIUMTEXT", "string");
+        hibernateTypeMap.put("LONGTEXT", "string");
         hibernateTypeMap.put("BIGINT", "long");
         hibernateTypeMap.put("FLOAT", "float");
         hibernateTypeMap.put("DATE", "date");
+        hibernateTypeMap.put("BLOB", "blob");
+        hibernateTypeMap.put("TINYBLOB", "blob");
+        hibernateTypeMap.put("MEDIUMBLOB", "blob");
+        hibernateTypeMap.put("LONGBLOB", "blob");
     }
 
     public static Field parse(String in) {

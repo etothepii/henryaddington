@@ -92,15 +92,13 @@ public class Main {
         if (databaseUploader.cleanDatabase()) {
             LOG.info("Successfully Cleaned Database");
             databaseUploader.upload();
+          LOG.info("Loaded files specified in applicationContext.xml");
         }
         else {
             LOG.info("Failed to Cleaned Database");
         }
         HibernateBuilder hibernateBuilder = (HibernateBuilder)context.getBean("hibernateBuilder");
         hibernateBuilder.process();
-        VOAUploader voaUploader = (VOAUploader)context.getBean("voaUploader");
-        LOG.info("Loading dwellings");
-        voaUploader.processDwellings();
     }
 
     private static void describedImageSplit(String[] args) {
