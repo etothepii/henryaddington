@@ -4,7 +4,7 @@
 
   <groupId>uk.co.epii.conservatives</groupId>
   <artifactId>henryaddington</artifactId>
-  <version>0.1.3</version>
+  <version>0.1.4</version>
   <packaging>jar</packaging>
   
   <description>An application for downloading, processing and otherwise manipulating the data required to run Frederick North</description>
