@@ -7,7 +7,6 @@ import org.springframework.context.support.ClassPathXmlApplicationContext;
 import uk.co.epii.conservatives.henryaddington.hibernate.HibernateBuilder;
 import uk.co.epii.conservatives.henryaddington.voa.VOADownloader;
 import uk.co.epii.conservatives.henryaddington.voa.VOAMerger;
-import uk.co.epii.conservatives.henryaddington.voa.VOAUploader;
 
 import java.io.File;
 import java.io.FilenameFilter;
