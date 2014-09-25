@@ -21,16 +21,29 @@ public class Field {
     private final boolean nullable;
 
     Field(String name, String javaType, String hibernateType, boolean primaryKey, boolean nullable, Integer length) {
-        this.dbName = name;
+        this.dbName = removeFunnies(name);
         this.javaType = javaType;
         this.hibernateType = hibernateType;
-        this.javaName = createJavaName(name);
+        this.javaName = createJavaName(removeFunnies(name));
         this.primaryKey = primaryKey;
         this.nullable = nullable;
         this.length = length;
     }
 
-    private String createJavaName(String name) {
+  private static String removeFunnies(String name) {
+    StringBuilder stringBuilder = new StringBuilder();
+    for (char c : name.toCharArray()) {
+      if (Character.isLetterOrDigit(c)) {
+        stringBuilder.append(c);
+      }
+      else if (c == '_') {
+        stringBuilder.append(c);
+      }
+    }
+    return stringBuilder.toString();
+  }
+
+  private String createJavaName(String name) {
         String[] words = name.split("_");
         StringBuilder stringBuilder = new StringBuilder(name.length());
         for (int i  = 0; i < words.length; i++) {
@@ -118,7 +131,7 @@ public class Field {
         if (key.equals("CHAR") && length > 1) {
             key = "VARCHAR";
         }
-        return new Field(fieldMatcher.group(1),
+        return new Field(removeFunnies(fieldMatcher.group(1)),
                 nullable ?
                         javaNullTypeMap.get(key) :
                         javaTypeMap.get(key),
