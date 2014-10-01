@@ -1,4 +1,4 @@
-package uk.co.epii.conservatives.henryaddington.hibernate;
+package uk.co.epii.conservatives.henryaddington.database;
 
 import java.util.ArrayList;
 import java.util.List;

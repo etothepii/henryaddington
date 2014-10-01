@@ -1,8 +1,7 @@
-package uk.co.epii.conservatives.henryaddington.hibernate;
+package uk.co.epii.conservatives.henryaddington.database;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import sun.misc.Regexp;
 
 import java.io.*;
 import java.util.ArrayList;
@@ -15,9 +14,9 @@ import java.util.regex.Pattern;
  * Date: 27/09/2013
  * Time: 22:06
  */
-public class HibernateBuilder {
+public class DatabaseBuilder {
 
-    private static final Logger LOG = LoggerFactory.getLogger(HibernateBuilder.class);
+    private static final Logger LOG = LoggerFactory.getLogger(DatabaseBuilder.class);
 
     private String resource;
     private HibernatePrinter hibernatePrinter;
@@ -40,7 +39,7 @@ public class HibernateBuilder {
         InputStreamReader inputStreamReader = null;
         BufferedReader bufferedReader = null;
         try {
-            inputStreamReader = new InputStreamReader(HibernateBuilder.class.getResourceAsStream(resource));
+            inputStreamReader = new InputStreamReader(DatabaseBuilder.class.getResourceAsStream(resource));
             bufferedReader = new BufferedReader(inputStreamReader);
             String in = null;
             try {

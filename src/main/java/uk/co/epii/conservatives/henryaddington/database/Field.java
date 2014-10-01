@@ -1,4 +1,4 @@
-package uk.co.epii.conservatives.henryaddington.hibernate;
+package uk.co.epii.conservatives.henryaddington.database;
 
 import java.util.HashMap;
 import java.util.Map;

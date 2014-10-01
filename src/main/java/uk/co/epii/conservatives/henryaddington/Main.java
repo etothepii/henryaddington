@@ -4,7 +4,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
-import uk.co.epii.conservatives.henryaddington.hibernate.HibernateBuilder;
+import uk.co.epii.conservatives.henryaddington.database.DatabaseBuilder;
 import uk.co.epii.conservatives.henryaddington.voa.VOADownloader;
 import uk.co.epii.conservatives.henryaddington.voa.VOAMerger;
 
@@ -96,8 +96,8 @@ public class Main {
         else {
             LOG.info("Failed to Cleaned Database");
         }
-        HibernateBuilder hibernateBuilder = (HibernateBuilder)context.getBean("hibernateBuilder");
-        hibernateBuilder.process();
+        DatabaseBuilder databaseBuilder = (DatabaseBuilder)context.getBean("databaseBuilder");
+        databaseBuilder.process();
     }
 
     private static void describedImageSplit(String[] args) {

@@ -1,4 +1,4 @@
-package uk.co.epii.conservatives.henryaddington.hibernate;
+package uk.co.epii.conservatives.henryaddington.database;
 
 import java.io.*;
 import java.util.Collections;
@@ -49,11 +49,11 @@ public class HibernatePrinter {
             fileWriter = new FileWriter(file, false);
             printWriter = new PrintWriter(fileWriter);
             printWriter.println("<?xml version=\"1.0\" encoding=\"utf-8\"?>");
-            printWriter.println("<!DOCTYPE hibernate-mapping PUBLIC");
+            printWriter.println("<!DOCTYPE database-mapping PUBLIC");
             printWriter.println(" \"-//Hibernate/Hibernate Mapping DTD//EN\"");
-            printWriter.println(" \"http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd\">");
+            printWriter.println(" \"http://www.database.org/dtd/database-mapping-3.0.dtd\">");
             printWriter.println();
-            printWriter.println("<hibernate-mapping>");
+            printWriter.println("<database-mapping>");
             printWriter.println(String.format("    <class name=\"%s.%s\" table=\"%s\">", javaPackage, table.name, table.name));
             Collections.sort(table.fields, new Comparator<Field>() {
                 @Override
@@ -77,7 +77,7 @@ public class HibernatePrinter {
                 }
             }
             printWriter.println("    </class>");
-            printWriter.println("</hibernate-mapping>");
+            printWriter.println("</database-mapping>");
         }
         catch (IOException ioe) {
             throw new RuntimeException(ioe);
