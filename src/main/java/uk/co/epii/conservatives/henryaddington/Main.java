@@ -41,6 +41,9 @@ public class Main {
             else if (args[0].equals("DATABASE")) {
                 database();
             }
+            else if (args[0].equals("DBPRINT")) {
+                databasePrintOnly();
+            }
             else if (args[0].equals("VOA_MERGE")) {
                 voaMerge(args);
             }
@@ -56,7 +59,13 @@ public class Main {
         }
     }
 
-    private static void voaSingleBand(String[] args) {
+  private static void databasePrintOnly() {
+    LOG.info("Printing Database Schema");
+    DatabaseBuilder databaseBuilder = (DatabaseBuilder)context.getBean("databaseBuilder");
+    databaseBuilder.process();
+  }
+
+  private static void voaSingleBand(String[] args) {
         VOADownloader downloader = (VOADownloader)context.getBean("voaDownloader");
         downloader.init();
         downloader.download(args[1], args[2]);
@@ -96,8 +105,7 @@ public class Main {
         else {
             LOG.info("Failed to Cleaned Database");
         }
-        DatabaseBuilder databaseBuilder = (DatabaseBuilder)context.getBean("databaseBuilder");
-        databaseBuilder.process();
+        databasePrintOnly();
     }
 
     private static void describedImageSplit(String[] args) {
