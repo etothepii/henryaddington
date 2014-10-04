@@ -21,6 +21,7 @@ public class NodeOrmPrinter {
   private String relationshipsFile;
   private PrintWriter printWriter;
   private String userNameEnvironmentVariable;
+  private String passwordEnvironmentVariable;
   private String databaseEnvironmentVariable;
   private List<Table> tables;
 
@@ -112,7 +113,7 @@ public class NodeOrmPrinter {
   private void printFields(List<Field> fields) {
     for (int i = 0; i < fields.size(); i++) {
       Field field = fields.get(i);
-      printWriter.println(String.format("%s: %s%s", field.getDbName(),
+      printWriter.println(String.format("    %s: %s%s", field.getDbName(),
               field.getNodeType(), i == fields.size() - 1 ? "" : ","));
     }
   }
@@ -139,25 +140,29 @@ public class NodeOrmPrinter {
     this.databaseEnvironmentVariable = databaseEnvironmentVariable;
   }
 
+  public void setPasswordEnvironmentVariable(String passwordEnvironmentVariable) {
+    this.passwordEnvironmentVariable = passwordEnvironmentVariable;
+  }
+
   private void printHeader() {
-    printWriter.println("var orm = require(\"orm\");\n");
-    printWriter.println("\n");
-    printWriter.println("exports.connect = function (fs, after) {\n");
-    printWriter.println("  var password;\n");
-    printWriter.println(String.format("  password = process.env.%s;\n", userNameEnvironmentVariable));
-    printWriter.println("  connectToDatabase(password, orm);\n");
-    printWriter.println("  after();\n");
-    printWriter.println("}\n");
-    printWriter.println("\n");
-    printWriter.println("function connectToDatabase(password, orm) {\n");
+    printWriter.println("var orm = require(\"orm\");");
+    printWriter.println("");
+    printWriter.println("exports.connect = function (fs, after) {");
+    printWriter.println("  var password;");
+    printWriter.println(String.format("  password = process.env.%s;", passwordEnvironmentVariable));
+    printWriter.println("  connectToDatabase(password, orm);");
+    printWriter.println("  after();");
+    printWriter.println("}");
+    printWriter.println("");
+    printWriter.println("function connectToDatabase(password, orm) {");
     printWriter.println(String.format("  orm.connect(\"mysql://\" + process.env.%s + \":\" + password + " +
-            "\"@localhost/\" + process.env.%s, function (err, db) {\n",
+            "\"@localhost/\" + process.env.%s, function (err, db) {",
             userNameEnvironmentVariable, databaseEnvironmentVariable));
-    printWriter.println("    if (err) throw err;\n");
-    printWriter.println("    buildORM(db);\n");
-    printWriter.println("  });\n");
-    printWriter.println("}\n");
-    printWriter.println("\n");
+    printWriter.println("    if (err) throw err;");
+    printWriter.println("    buildORM(db);");
+    printWriter.println("  });");
+    printWriter.println("}");
+    printWriter.println("");
   }
 
   public void setTables(List<Table> tables) {
