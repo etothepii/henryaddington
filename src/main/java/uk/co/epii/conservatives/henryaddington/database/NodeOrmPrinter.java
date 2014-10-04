@@ -170,6 +170,11 @@ public class NodeOrmPrinter {
   }
 
   public void setRelationshipsFile(String relationshipsFile) {
-    this.relationshipsFile = relationshipsFile;
+    if (relationshipsFile.charAt(0) == '~') {
+      this.relationshipsFile = System.getProperty("user.home") + relationshipsFile.substring(1);
+    }
+    else {
+      this.relationshipsFile = relationshipsFile;
+    }
   }
 }
