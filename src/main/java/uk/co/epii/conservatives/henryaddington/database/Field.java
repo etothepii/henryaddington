@@ -26,6 +26,7 @@ public class Field {
         this.javaType = javaType;
         this.hibernateType = hibernateType;
         this.javaName = createJavaName(removeFunnies(name));
+        this.nodeType = nodeType;
         this.primaryKey = primaryKey;
         this.nullable = nullable;
         this.length = length;
