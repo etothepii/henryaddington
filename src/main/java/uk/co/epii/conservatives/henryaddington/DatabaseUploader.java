@@ -31,6 +31,7 @@ public class DatabaseUploader {
     private Connection connection;
     private int port;
     private List<String> files;
+    private String sqlDumpFile;
 
     public void setFiles(List<String> files) {
         this.files = new ArrayList<String>(files.size());
@@ -67,7 +68,16 @@ public class DatabaseUploader {
         this.port = port;
     }
 
-    public void setServer(String server) {
+  public void setSqlDumpFile(String sqlDumpFile) {
+    if (sqlDumpFile.charAt(0) == '~') {
+      this.sqlDumpFile = System.getProperty("user.home") + sqlDumpFile.substring(1);
+    }
+    else {
+      this.sqlDumpFile = sqlDumpFile;
+    }
+  }
+
+  public void setServer(String server) {
         this.server = server;
     }
 
@@ -185,13 +195,60 @@ public class DatabaseUploader {
                         entry.getValue(), entry.getKey());
                 statement.executeUpdate(query);
             }
+            uploadSqlDumpFile();
         }
         catch (SQLException sqle) {
             throw new RuntimeException(sqle);
         }
     }
 
-    private Map<String, String> parseDataToOneTempFilePerTable () {
+  private void uploadSqlDumpFile() {
+    if (sqlDumpFile == null) {
+      return;
+    }
+    try {
+      executeSqlDumpFile();
+    }
+    catch (SQLException sqle) {
+      LOG.error(sqle.getMessage(), sqle);
+    }
+    catch (IOException ioe) {
+      LOG.error(ioe.getMessage(), ioe);
+    }
+  }
+
+  private void executeSqlDumpFile() throws IOException, SQLException {
+    LOG.info("Uploading dump file");
+    FileReader fileReader = new FileReader(sqlDumpFile);
+    BufferedReader bufferedReader = new BufferedReader(fileReader);
+    String in;
+    StringBuilder stringBuilder = new StringBuilder(500000);
+    while ((in = bufferedReader.readLine()) != null) {
+      stringBuilder.append(in);
+      stringBuilder.append('\n');
+    }
+    bufferedReader.close();
+    fileReader.close();
+    Statement statement = connection.createStatement();
+    int index = 0;
+    while (index < stringBuilder.length()) {
+      LOG.debug("index: {}", index);
+      int toIndex = stringBuilder.indexOf(";", index);
+      if (toIndex < 0) {
+        toIndex = stringBuilder.length();
+      }
+      String command = stringBuilder.substring(index, toIndex).trim();
+      index = toIndex + 1;
+      if (command.length() == 0) {
+        continue;
+      }
+      LOG.debug(command);
+      statement.execute(command);
+    }
+    LOG.info("Uploaded dump file");
+  }
+
+  private Map<String, String> parseDataToOneTempFilePerTable () {
         Map<Integer, FileWriter> fileWriters = new HashMap<Integer, FileWriter>();
         Map<Integer, PrintWriter> printWriters = new HashMap<Integer, PrintWriter>();
         try {

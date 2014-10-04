@@ -25,25 +25,36 @@
                 <value>~/frederickNorth/THH/AddressBasePremium/AddressBasePremium_FULL_2013-08-06_003.csv</value>
             </list>
         </property>
+        <property name="sqlDumpFile" value="~/frederickNorth/createdData.sql"/>
     </bean>
 
-    <bean id="hibernatePrinter" class="uk.co.epii.conservatives.henryaddington.database.HibernatePrinter">
-        <property name="javaDirectory"
-                  value="~/git/politics/williamCavendishBentinck/src/main/java/uk/co/epii/politics/williamCavendishBentinck/tables"/>
-        <property name="hibernateDirectory"
-                  value="~/git/politics/williamCavendishBentinck/src/main/resources/tables"/>
-        <property name="javaPackage" value="uk.co.epii.politics.williamcavendishbentinck.tables" />
-        <property name="javaImports">
-            <list>
-                <value>java.sql.Date</value>
-                <value>java.sql.Blob</value>
-            </list>
-        </property>
-    </bean>
+  <bean id="hibernatePrinter" class="uk.co.epii.conservatives.henryaddington.database.HibernatePrinter">
+    <property name="javaDirectory"
+              value="~/git/politics/williamCavendishBentinck/src/main/java/uk/co/epii/politics/williamCavendishBentinck/tables"/>
+    <property name="hibernateDirectory"
+              value="~/git/politics/williamCavendishBentinck/src/main/resources/tables"/>
+    <property name="javaPackage" value="uk.co.epii.politics.williamcavendishbentinck.tables" />
+    <property name="javaImports">
+      <list>
+        <value>java.sql.Date</value>
+        <value>java.sql.Blob</value>
+      </list>
+    </property>
+  </bean>
+
+  <bean id="nodePrinter" class="uk.co.epii.conservatives.henryaddington.database.NodeOrmPrinter">
+    <property name="outputFile"
+              value="~/git/politics/henrypelham/lib/frederickNorthDB.js"/>
+    <property name="relationshipsFile"
+              value="/relationships.txt"/>
+    <property name="userNameEnvironmentVariable" value="FREDNORTH_DB_USERNAME" />
+    <property name="databaseEnvironmentVariable" value="DATABASE" />
+  </bean>
 
     <bean id="databaseBuilder" class="uk.co.epii.conservatives.henryaddington.database.DatabaseBuilder">
         <property name="resource" value="/createAddressBaseTables.sql" />
         <property name="hibernatePrinter" ref="hibernatePrinter"/>
+        <property name="nodeOrmPrinter" ref="nodePrinter"/>
     </bean>
 
     <bean id="voaDownloader" class="uk.co.epii.conservatives.henryaddington.voa.VOADownloader">

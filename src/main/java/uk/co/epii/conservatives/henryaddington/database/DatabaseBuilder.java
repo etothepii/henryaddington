@@ -21,6 +21,12 @@ public class DatabaseBuilder {
     private String resource;
     private HibernatePrinter hibernatePrinter;
 
+  public void setNodeOrmPrinter(NodeOrmPrinter nodeOrmPrinter) {
+    this.nodeOrmPrinter = nodeOrmPrinter;
+  }
+
+  private NodeOrmPrinter nodeOrmPrinter;
+
     public void setResource(String resource) {
         this.resource = resource;
     }
@@ -30,7 +36,10 @@ public class DatabaseBuilder {
     }
 
     public void process() {
-        hibernatePrinter.print(read());
+        List<Table> tables = read();
+        hibernatePrinter.print(tables);
+        nodeOrmPrinter.setTables(tables);
+        nodeOrmPrinter.print();
     }
 
     private List<Table> read() {

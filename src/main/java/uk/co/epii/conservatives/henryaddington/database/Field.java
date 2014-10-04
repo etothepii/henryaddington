@@ -19,8 +19,9 @@ public class Field {
     private Integer length;
     private final boolean primaryKey;
     private final boolean nullable;
+  private String nodeType;
 
-    Field(String name, String javaType, String hibernateType, boolean primaryKey, boolean nullable, Integer length) {
+  Field(String name, String javaType, String nodeType, String hibernateType, boolean primaryKey, boolean nullable, Integer length) {
         this.dbName = removeFunnies(name);
         this.javaType = javaType;
         this.hibernateType = hibernateType;
@@ -103,23 +104,41 @@ public class Field {
         javaNullTypeMap.put("LONGBLOB", "Blob");
     }
 
-    private static Map<String, String> hibernateTypeMap = new HashMap<String, String>();
-    static {
-        hibernateTypeMap.put("INT", "integer");
-        hibernateTypeMap.put("VARCHAR", "string");
-        hibernateTypeMap.put("CHAR", "character");
-        hibernateTypeMap.put("TINYTEXT", "string");
-        hibernateTypeMap.put("TEXT", "string");
-        hibernateTypeMap.put("MEDIUMTEXT", "string");
-        hibernateTypeMap.put("LONGTEXT", "string");
-        hibernateTypeMap.put("BIGINT", "long");
-        hibernateTypeMap.put("FLOAT", "float");
-        hibernateTypeMap.put("DATE", "date");
-        hibernateTypeMap.put("BLOB", "blob");
-        hibernateTypeMap.put("TINYBLOB", "blob");
-        hibernateTypeMap.put("MEDIUMBLOB", "blob");
-        hibernateTypeMap.put("LONGBLOB", "blob");
-    }
+  private static Map<String, String> hibernateTypeMap = new HashMap<String, String>();
+  static {
+    hibernateTypeMap.put("INT", "integer");
+    hibernateTypeMap.put("VARCHAR", "string");
+    hibernateTypeMap.put("CHAR", "character");
+    hibernateTypeMap.put("TINYTEXT", "string");
+    hibernateTypeMap.put("TEXT", "string");
+    hibernateTypeMap.put("MEDIUMTEXT", "string");
+    hibernateTypeMap.put("LONGTEXT", "string");
+    hibernateTypeMap.put("BIGINT", "long");
+    hibernateTypeMap.put("FLOAT", "float");
+    hibernateTypeMap.put("DATE", "date");
+    hibernateTypeMap.put("BLOB", "blob");
+    hibernateTypeMap.put("TINYBLOB", "blob");
+    hibernateTypeMap.put("MEDIUMBLOB", "blob");
+    hibernateTypeMap.put("LONGBLOB", "blob");
+  }
+
+  private static Map<String, String> nodeTypeMap = new HashMap<String, String>();
+  static {
+    nodeTypeMap.put("INT", "Number");
+    nodeTypeMap.put("VARCHAR", "String");
+    nodeTypeMap.put("CHAR", "String");
+    nodeTypeMap.put("TINYTEXT", "String");
+    nodeTypeMap.put("TEXT", "String");
+    nodeTypeMap.put("MEDIUMTEXT", "String");
+    nodeTypeMap.put("LONGTEXT", "String");
+    nodeTypeMap.put("BIGINT", "Number");
+    nodeTypeMap.put("FLOAT", "Number");
+    nodeTypeMap.put("DATE", "Date");
+    nodeTypeMap.put("BLOB", "Buffer");
+    nodeTypeMap.put("TINYBLOB", "Buffer");
+    nodeTypeMap.put("MEDIUMBLOB", "Buffer");
+    nodeTypeMap.put("LONGBLOB", "Buffer");
+  }
 
     public static Field parse(String in) {
         Matcher fieldMatcher = fieldPattern.matcher(in);
@@ -135,6 +154,7 @@ public class Field {
                 nullable ?
                         javaNullTypeMap.get(key) :
                         javaTypeMap.get(key),
+                nodeTypeMap.get(key),
                 hibernateTypeMap.get(key),
                 in.contains("PRIMARY KEY"), nullable, length);
     }
@@ -165,4 +185,8 @@ public class Field {
     public boolean isPrimaryKey() {
         return primaryKey;
     }
+
+  public String getNodeType() {
+    return nodeType;
+  }
 }

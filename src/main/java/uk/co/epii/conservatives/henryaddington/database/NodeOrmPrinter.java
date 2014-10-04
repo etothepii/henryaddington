@@ -1,8 +1,11 @@
 package uk.co.epii.conservatives.henryaddington.database;
 
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.PrintWriter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import uk.co.epii.spencerperceval.FileLineIterable;
+
+import java.io.*;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -12,7 +15,13 @@ import java.util.List;
  */
 public class NodeOrmPrinter {
 
+  private static final Logger LOG = LoggerFactory.getLogger(NodeOrmPrinter.class);
+
   private String outputFile;
+  private String relationshipsFile;
+  private PrintWriter printWriter;
+  private String userNameEnvironmentVariable;
+  private String databaseEnvironmentVariable;
   private List<Table> tables;
 
   public String getOutputFile() {
@@ -20,19 +29,24 @@ public class NodeOrmPrinter {
   }
 
   public void setOutputFile(String outputFile) {
-    this.outputFile = outputFile;
+    if (outputFile.charAt(0) == '~') {
+      this.outputFile = System.getProperty("user.home") + outputFile.substring(1);
+    }
+    else {
+      this.outputFile = outputFile;
+    }
   }
 
   public void print() {
     if (outputFile == null) return;
     FileWriter fileWriter = null;
-    PrintWriter printWriter = null;
+    printWriter = null;
     try {
       fileWriter = new FileWriter(getOutputFile());
       printWriter = new PrintWriter(fileWriter);
-      printHeader(printWriter);
-      declareTables(printWriter);
-      buildOrm(printWriter);
+      printHeader();
+      declareTables();
+      buildOrm();
     }
     catch (IOException ioe) {
       throw new RuntimeException(ioe);
@@ -53,13 +67,57 @@ public class NodeOrmPrinter {
     }
   }
 
-  private void buildOrm(PrintWriter printWriter) {
+  private void buildOrm() {
     printWriter.println();
     printWriter.println("function buildORM(db) {");
+    for (Table table : tables) {
+      buildTable(table);
+    }
+    if (relationshipsFile != null) {
+      try {
+        loadRelationShips();
+      }
+      catch (IOException ioe) {
+        LOG.error(ioe.getMessage(), ioe);
+      }
+    }
     printWriter.println("}");
   }
 
-  private void declareTables(PrintWriter printWriter) {
+  private void loadRelationShips() throws IOException {
+    for (String line : new FileLineIterable(relationshipsFile)) {
+      printWriter.println(line);
+    }
+  }
+
+  private void buildTable(Table table) {
+    printWriter.println(String.format("  %s = db.define(\"%s\", {", getNodeName(table.name), table.name));
+    printFields(table.fields);
+    printWriter.println("  },{");
+    printIds(table.fields);
+    printWriter.println("  });");
+    printWriter.println(String.format("  exports.%s = %s;", table.name, getNodeName(table.name)));
+  }
+
+  private void printIds(List<Field> fields) {
+    List<Field> ids = new ArrayList<Field>(fields.size());
+    for (Field field : fields) {
+      if (field.isPrimaryKey()) {
+        ids.add(field);
+      }
+    }
+    printFields(ids);
+  }
+
+  private void printFields(List<Field> fields) {
+    for (int i = 0; i < fields.size(); i++) {
+      Field field = fields.get(i);
+      printWriter.println(String.format("%s: %s%s", field.getDbName(),
+              field.getNodeType(), i == fields.size() - 1 ? "" : ","));
+    }
+  }
+
+  private void declareTables() {
     for (Table table : tables) {
       printWriter.println(String.format("var %s;", getNodeName(table.name)));
     }
@@ -73,18 +131,28 @@ public class NodeOrmPrinter {
     return stringBuilder.toString();
   }
 
-  private void printHeader(PrintWriter printWriter) {
+  public void setUserNameEnvironmentVariable(String userNameEnvironmentVariable) {
+    this.userNameEnvironmentVariable = userNameEnvironmentVariable;
+  }
+
+  public void setDatabaseEnvironmentVariable(String databaseEnvironmentVariable) {
+    this.databaseEnvironmentVariable = databaseEnvironmentVariable;
+  }
+
+  private void printHeader() {
     printWriter.println("var orm = require(\"orm\");\n");
     printWriter.println("\n");
     printWriter.println("exports.connect = function (fs, after) {\n");
     printWriter.println("  var password;\n");
-    printWriter.println("  password = process.env.FREDNORTH_DB_PASSWORD;\n");
+    printWriter.println(String.format("  password = process.env.%s;\n", userNameEnvironmentVariable));
     printWriter.println("  connectToDatabase(password, orm);\n");
     printWriter.println("  after();\n");
     printWriter.println("}\n");
     printWriter.println("\n");
     printWriter.println("function connectToDatabase(password, orm) {\n");
-    printWriter.println("  orm.connect(\"mysql://\" + process.env.FREDNORTH_DB_USERNAME + \":\" + password + \"@localhost/\" + process.env.DATABASE, function (err, db) {\n");
+    printWriter.println(String.format("  orm.connect(\"mysql://\" + process.env.%s + \":\" + password + " +
+            "\"@localhost/\" + process.env.%s, function (err, db) {\n",
+            userNameEnvironmentVariable, databaseEnvironmentVariable));
     printWriter.println("    if (err) throw err;\n");
     printWriter.println("    buildORM(db);\n");
     printWriter.println("  });\n");
@@ -94,5 +162,9 @@ public class NodeOrmPrinter {
 
   public void setTables(List<Table> tables) {
     this.tables = tables;
+  }
+
+  public void setRelationshipsFile(String relationshipsFile) {
+    this.relationshipsFile = relationshipsFile;
   }
 }
