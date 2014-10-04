@@ -46,7 +46,7 @@
     <property name="outputFile"
               value="~/git/politics/henrypelham/lib/frederickNorthDB.js"/>
     <property name="relationshipsFile"
-              value="/relationships.txt"/>
+              value="~/git/politics/henryaddington/src/main/resources/relationships.txt"/>
     <property name="userNameEnvironmentVariable" value="FREDNORTH_DB_USERNAME" />
     <property name="passwordEnvironmentVariable" value="FREDNORTH_DB_PASSWORD" />
     <property name="databaseEnvironmentVariable" value="DATABASE" />
