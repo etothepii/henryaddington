@@ -44,7 +44,7 @@
 
   <bean id="nodePrinter" class="uk.co.epii.conservatives.henryaddington.database.NodeOrmPrinter">
     <property name="outputFile"
-              value="~/git/politics/henrypelham/lib/frederickNorthDB.js"/>
+              value="~/git/politics/henrypelham/lib/frederickNorthDBRaw.js"/>
     <property name="relationshipsFile"
               value="~/git/politics/henryaddington/src/main/resources/relationships.txt"/>
     <property name="userNameEnvironmentVariable" value="FREDNORTH_DB_USERNAME" />

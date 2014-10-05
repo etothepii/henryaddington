@@ -1,5 +1,5 @@
   classification.hasOne("deliverypointAddress", deliveryPointAddress, {field:"UPRN", reverse:"classification"});
-  deliveryPointAddress.hasOne("uprn", uprn, {field:"UPRN", reverse:"deliveryPointAddress"});
+  deliveryPointAddress.hasOne("blpu", bLPU, {field:"UPRN", reverse:"deliveryPointAddress"});
   route.hasOne("boundedArea", boundedArea, {field:"BOUNDED_AREA", reverse: "routes"});
   route.hasOne("owner", person, {field:"OWNER", reverse: "routes"});
   route.hasOne("ownerGroup", groups, {field:"OWNER_GROUP", reverse: "routes"});
@@ -9,7 +9,7 @@
   leafletMap.hasOne("leaflet", leaflet, {field:"LEAFLET", reverse:"maps"});
   leafletMap.hasOne("route", route, {field:"ROUTE", reverse:"maps"});
   leafletMap.hasOne("deliverer", person, {field:"DELIVERED_BY", reverse: "maps"});
-  groupMembers.hasOne("group", group, {field:"GROUP", reverse: "members"});
+  groupMembers.hasOne("group", groups, {field:"GROUP", reverse: "members"});
   groupMembers.hasOne("member", person, {field:"GROUP", reverse: "groups"});
   groupMembers.hasOne("groupMember", groupMembers, {field:"GROUP_MEMBER", reverse: "groupMembers"});
   boundedArea.hasOne("parent", boundedArea, {Field:"PARENT", reverse: "children"});

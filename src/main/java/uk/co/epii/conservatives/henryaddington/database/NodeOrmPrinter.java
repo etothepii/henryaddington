@@ -147,19 +147,19 @@ public class NodeOrmPrinter {
   private void printHeader() {
     printWriter.println("var orm = require(\"orm\");");
     printWriter.println("");
-    printWriter.println("exports.connect = function (fs, after) {");
+    printWriter.println("exports.connect = function (after) {");
     printWriter.println("  var password;");
     printWriter.println(String.format("  password = process.env.%s;", passwordEnvironmentVariable));
-    printWriter.println("  connectToDatabase(password, orm);");
-    printWriter.println("  after();");
+    printWriter.println("  connectToDatabase(password, orm, after);");
     printWriter.println("}");
     printWriter.println("");
-    printWriter.println("function connectToDatabase(password, orm) {");
+    printWriter.println("function connectToDatabase(password, orm, after) {");
     printWriter.println(String.format("  orm.connect(\"mysql://\" + process.env.%s + \":\" + password + " +
             "\"@localhost/\" + process.env.%s, function (err, db) {",
             userNameEnvironmentVariable, databaseEnvironmentVariable));
     printWriter.println("    if (err) throw err;");
     printWriter.println("    buildORM(db);");
+    printWriter.println("    after();");
     printWriter.println("  });");
     printWriter.println("}");
     printWriter.println("");
