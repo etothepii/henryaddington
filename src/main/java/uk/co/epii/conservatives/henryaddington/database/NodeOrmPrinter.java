@@ -71,6 +71,7 @@ public class NodeOrmPrinter {
   private void buildOrm() {
     printWriter.println();
     printWriter.println("function buildORM(db) {");
+    printWriter.println(" db.settings.set(\"properties.association_key\", \"{field}\");");
     for (Table table : tables) {
       buildTable(table);
     }
